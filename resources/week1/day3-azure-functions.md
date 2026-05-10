@@ -213,35 +213,37 @@ az storage account create \
 ```bash
 mkdir func-day3 && cd func-day3
 
-# Initialize project
-func init --python
+# Initialize project — v2 programming model
+func init --python --model V2
 
 # Your project structure:
 # func-day3/
-#   host.json          ← global settings (timeout, logging)
+#   function_app.py     ← ALL functions go here (decorators)
+#   host.json           ← global settings (timeout, logging)
 #   local.settings.json ← local env vars (NOT committed to git)
 #   requirements.txt
 ```
+
+> **v2 vs v1:** v2 uses a single `function_app.py` with Python decorators. No `__init__.py` or `function.json` per function. This is the current recommended model.
 
 ---
 
 ### Lab A — HTTP Trigger
 
-```bash
-func new --name HttpTasksApi --template "HTTP trigger" --authlevel "anonymous"
-```
-
-Edit `HttpTasksApi/__init__.py`:
+Edit `function_app.py`:
 
 ```python
 import azure.functions as func
 import json
 import logging
 
+app = func.FunctionApp()
+
 tasks = []
 next_id = [1]
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="HttpTasksApi", auth_level=func.AuthLevel.ANONYMOUS, methods=["GET", "POST"])
+def HttpTasksApi(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(f"HTTP trigger: {req.method} {req.url}")
 
     if req.method == "GET":
@@ -268,27 +270,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse("Method not allowed", status_code=405)
 ```
 
-Edit `HttpTasksApi/function.json` to allow GET and POST:
-
-```json
-{
-  "scriptFile": "__init__.py",
-  "bindings": [
-    {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
-      "direction": "in",
-      "name": "req",
-      "methods": ["get", "post"]
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "$return"
-    }
-  ]
-}
-```
+> No `function.json` needed — the `@app.route()` decorator replaces it.
 
 Test locally:
 
@@ -306,18 +288,13 @@ curl http://localhost:7071/api/HttpTasksApi
 
 ### Lab B — Timer Trigger (every 5 minutes)
 
-```bash
-func new --name BatchReportTimer --template "Timer trigger"
-```
-
-Edit `BatchReportTimer/__init__.py`:
+Add to `function_app.py` (below Lab A code):
 
 ```python
-import azure.functions as func
 import datetime
-import logging
 
-def main(mytimer: func.TimerRequest) -> None:
+@app.timer_trigger(schedule="0 */5 * * * *", arg_name="mytimer", run_on_startup=True)
+def BatchReportTimer(mytimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().isoformat()
 
     if mytimer.past_due:
@@ -328,21 +305,7 @@ def main(mytimer: func.TimerRequest) -> None:
     # In Day 10 demo: query Azure SQL + write JSON to Blob Storage
 ```
 
-Edit `BatchReportTimer/function.json` CRON to every 5 minutes:
-
-```json
-{
-  "scriptFile": "__init__.py",
-  "bindings": [
-    {
-      "name": "mytimer",
-      "type": "timerTrigger",
-      "direction": "in",
-      "schedule": "0 */5 * * * *"
-    }
-  ]
-}
-```
+> `run_on_startup=True` makes the timer fire immediately when running locally — useful for testing without waiting 5 minutes.
 
 Test locally (timer fires immediately on start, then every 5 min):
 
@@ -355,39 +318,18 @@ func start
 
 ### Lab C — Blob Trigger (process uploaded file)
 
-```bash
-func new --name BlobProcessor --template "Azure Blob Storage trigger"
-```
-
-Edit `BlobProcessor/function.json`:
-
-```json
-{
-  "scriptFile": "__init__.py",
-  "bindings": [
-    {
-      "name": "myblob",
-      "type": "blobTrigger",
-      "direction": "in",
-      "path": "uploads/{name}",
-      "connection": "AzureWebJobsStorage"
-    }
-  ]
-}
-```
-
-Edit `BlobProcessor/__init__.py`:
+Add to `function_app.py` (below Lab B code):
 
 ```python
-import azure.functions as func
-import logging
-
-def main(myblob: func.InputStream):
+@app.blob_trigger(arg_name="myblob", path="uploads/{name}", connection="AzureWebJobsStorage")
+def BlobProcessor(myblob: func.InputStream) -> None:
     content = myblob.read()
     logging.info(f"[BlobProcessor] Processed blob: {myblob.name}")
     logging.info(f"  Size: {myblob.length} bytes")
     logging.info(f"  Preview: {content[:100]}")
 ```
+
+> No `function.json` needed — the `@app.blob_trigger()` decorator replaces it.
 
 Update `local.settings.json` to point to your real storage account for local testing:
 
