@@ -11,7 +11,14 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@primevue/themes": "^4.5.4",
+    "@tailwindcss/vite": "^4.3.0",
+    "axios": "^1.16.1",
     "pinia": "^3.0.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.5.5",
+    "tailwindcss": "^4.3.0",
+    "tailwindcss-primeui": "^0.6.1",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4"
   },
