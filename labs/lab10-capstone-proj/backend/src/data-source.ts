@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { User } from './users/user.entity';
 import { Challenge } from './challenges/challenge.entity';
+import { Enrollment } from './enrollments/enrollment.entity';
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ if (!databaseUrl) {
 export default new DataSource({
   type: 'postgres',
   url: databaseUrl,
-  entities: [User, Challenge],
+  entities: [User, Challenge, Enrollment],
   migrations: ['src/migrations/*.ts'],
   migrationsTableName: 'migrations',
 });

@@ -7,6 +7,7 @@ import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
+import Tooltip from 'primevue/tooltip'
 import Lara from '@primevue/themes/lara'
 
 import App from './App.vue'
@@ -21,6 +22,7 @@ app.use(router)
 app.use(PrimeVue, { theme: { preset: Lara } })
 app.use(ToastService)
 app.use(ConfirmationService)
+app.directive('tooltip', Tooltip)
 
 const auth = useAuthStore(pinia)
 void auth.hydrate().finally(() => {

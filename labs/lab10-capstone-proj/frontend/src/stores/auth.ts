@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import api from '@/api/axios'
 import type { User } from '@/api/types'
+import { useEnrollmentsStore } from '@/stores/enrollments'
 
 const TOKEN_KEY = 'auth_token'
 
@@ -34,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     setToken(null)
     user.value = null
+    useEnrollmentsStore().reset()
     if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
       window.location.href = '/login'
     }

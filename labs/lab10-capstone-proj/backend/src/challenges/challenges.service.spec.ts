@@ -30,40 +30,71 @@ function buildEntity(overrides: Partial<Challenge> = {}): Challenge {
 interface MockQb {
   where: jest.Mock;
   andWhere: jest.Mock;
+  addSelect: jest.Mock;
   orderBy: jest.Mock;
   skip: jest.Mock;
   take: jest.Mock;
-  getManyAndCount: jest.Mock;
+  clone: jest.Mock;
+  getCount: jest.Mock;
+  getRawAndEntities: jest.Mock;
 }
 
 function buildQb(entities: Challenge[], total: number): MockQb {
-  const qb: MockQb = {
+  const qb = {
     where: jest.fn(),
     andWhere: jest.fn(),
+    addSelect: jest.fn(),
     orderBy: jest.fn(),
     skip: jest.fn(),
     take: jest.fn(),
-    getManyAndCount: jest.fn().mockResolvedValue([entities, total]),
+    clone: jest.fn(),
+    getCount: jest.fn().mockResolvedValue(total),
+    getRawAndEntities: jest.fn().mockResolvedValue({
+      entities,
+      raw: entities.map(() => ({ enrollments_count: '0' })),
+    }),
   };
   qb.where.mockReturnValue(qb);
   qb.andWhere.mockReturnValue(qb);
+  qb.addSelect.mockReturnValue(qb);
   qb.orderBy.mockReturnValue(qb);
   qb.skip.mockReturnValue(qb);
   qb.take.mockReturnValue(qb);
+  qb.clone.mockReturnValue(qb);
+  return qb;
+}
+
+function buildCountQb(count: number) {
+  const qb: Record<string, jest.Mock> = {
+    select: jest.fn(),
+    from: jest.fn(),
+    where: jest.fn(),
+    andWhere: jest.fn(),
+    getRawOne: jest.fn().mockResolvedValue({ count: String(count) }),
+  };
+  qb.select.mockReturnValue(qb);
+  qb.from.mockReturnValue(qb);
+  qb.where.mockReturnValue(qb);
+  qb.andWhere.mockReturnValue(qb);
   return qb;
 }
 
 describe('ChallengesService', () => {
   let service: ChallengesService;
   let repo: jest.Mocked<Repository<Challenge>>;
+  let managerCreateQb: jest.Mock;
 
   beforeEach(async () => {
+    managerCreateQb = jest.fn().mockReturnValue(buildCountQb(0));
     const repoMock: Partial<jest.Mocked<Repository<Challenge>>> = {
       create: jest.fn(),
       save: jest.fn(),
       findOne: jest.fn(),
       softRemove: jest.fn(),
       createQueryBuilder: jest.fn(),
+      manager: {
+        createQueryBuilder: managerCreateQb,
+      } as unknown as Repository<Challenge>['manager'],
     };
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
@@ -168,8 +199,12 @@ describe('ChallengesService', () => {
   });
 
   describe('findAll', () => {
-    it('returns paginated result with defaults', async () => {
+    it('returns paginated result with defaults and dynamic enrollmentsCount', async () => {
       const qb = buildQb([buildEntity()], 1);
+      qb.getRawAndEntities.mockResolvedValue({
+        entities: [buildEntity()],
+        raw: [{ enrollments_count: '2' }],
+      });
       repo.createQueryBuilder.mockReturnValue(
         qb as unknown as ReturnType<
           Repository<Challenge>['createQueryBuilder']
@@ -180,12 +215,14 @@ describe('ChallengesService', () => {
       expect(qb.orderBy).toHaveBeenCalledWith('c.created_at', 'DESC');
       expect(qb.skip).toHaveBeenCalledWith(0);
       expect(qb.take).toHaveBeenCalledWith(20);
-      expect(result).toEqual({
-        items: expect.any(Array),
-        page: 1,
-        limit: 20,
-        total: 1,
-      });
+      expect(qb.addSelect).toHaveBeenCalledWith(
+        expect.stringContaining('FROM enrollments e'),
+        'enrollments_count',
+      );
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(20);
+      expect(result.total).toBe(1);
+      expect(result.items[0].enrollmentsCount).toBe(2);
     });
 
     it('applies status filter', async () => {
@@ -234,6 +271,13 @@ describe('ChallengesService', () => {
       await expect(service.findOne(CHALLENGE_ID)).rejects.toBeInstanceOf(
         NotFoundException,
       );
+    });
+
+    it('returns DTO with enrollmentsCount from the count subquery', async () => {
+      repo.findOne.mockResolvedValue(buildEntity());
+      managerCreateQb.mockReturnValue(buildCountQb(3));
+      const result = await service.findOne(CHALLENGE_ID);
+      expect(result.enrollmentsCount).toBe(3);
     });
   });
 });

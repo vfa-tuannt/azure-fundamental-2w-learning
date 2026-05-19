@@ -11,6 +11,10 @@ import { UpdateChallengeDto } from './dto/update-challenge.dto';
 import { ListChallengesQueryDto } from './dto/list-challenges.query.dto';
 import { ChallengeDto, ChallengeListResponse } from './dto/challenge.dto';
 
+interface RawChallengeRow extends Record<string, unknown> {
+  enrollments_count?: string | number;
+}
+
 @Injectable()
 export class ChallengesService {
   constructor(
@@ -32,7 +36,7 @@ export class ChallengesService {
       status: ChallengeStatus.OPEN,
     });
     const saved = await this.challenges.save(entity);
-    return this.toDto(saved);
+    return this.toDto(saved, 0);
   }
 
   async findAll(query: ListChallengesQueryDto): Promise<ChallengeListResponse> {
@@ -52,23 +56,38 @@ export class ChallengesService {
       );
     }
 
-    const [entities, total] = await qb
+    const total = await qb.getCount();
+
+    const { entities, raw } = await qb
+      .clone()
+      .addSelect(
+        `(SELECT COUNT(*) FROM enrollments e WHERE e.challenge_id = c.id AND e.status != 'rejected')`,
+        'enrollments_count',
+      )
       .orderBy('c.created_at', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
-      .getManyAndCount();
+      .getRawAndEntities();
 
-    return {
-      items: entities.map((e) => this.toDto(e)),
-      page,
-      limit,
-      total,
-    };
+    const items = entities.map((entity, idx) => {
+      const raw_row = raw[idx] as RawChallengeRow;
+      const rawCount = raw_row?.enrollments_count;
+      const count =
+        typeof rawCount === 'string'
+          ? Number(rawCount)
+          : typeof rawCount === 'number'
+            ? rawCount
+            : 0;
+      return this.toDto(entity, count);
+    });
+
+    return { items, page, limit, total };
   }
 
   async findOne(id: string): Promise<ChallengeDto> {
     const entity = await this.loadById(id);
-    return this.toDto(entity);
+    const count = await this.countEnrollments(id);
+    return this.toDto(entity, count);
   }
 
   async update(
@@ -89,7 +108,8 @@ export class ChallengesService {
       entity.maxEnrollments = dto.maxEnrollments;
     if (dto.status !== undefined) entity.status = dto.status;
     const saved = await this.challenges.save(entity);
-    return this.toDto(saved);
+    const count = await this.countEnrollments(saved.id);
+    return this.toDto(saved, count);
   }
 
   async remove(id: string, userId: string): Promise<void> {
@@ -108,7 +128,18 @@ export class ChallengesService {
     return entity;
   }
 
-  private toDto(entity: Challenge): ChallengeDto {
+  private async countEnrollments(challengeId: string): Promise<number> {
+    const result = await this.challenges.manager
+      .createQueryBuilder()
+      .select('COUNT(*)', 'count')
+      .from('enrollments', 'e')
+      .where('e.challenge_id = :challengeId', { challengeId })
+      .andWhere(`e.status != 'rejected'`)
+      .getRawOne<{ count: string }>();
+    return result ? Number(result.count) : 0;
+  }
+
+  private toDto(entity: Challenge, enrollmentsCount: number): ChallengeDto {
     return {
       id: entity.id,
       ownerId: entity.ownerId,
@@ -119,7 +150,7 @@ export class ChallengesService {
       maxEnrollments: entity.maxEnrollments,
       status: entity.status,
       createdAt: entity.createdAt.toISOString(),
-      enrollmentsCount: 0,
+      enrollmentsCount,
     };
   }
 }

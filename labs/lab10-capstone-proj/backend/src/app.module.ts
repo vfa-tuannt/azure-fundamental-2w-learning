@@ -6,8 +6,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ChallengesModule } from './challenges/challenges.module';
+import { EnrollmentsModule } from './enrollments/enrollments.module';
+import { MeModule } from './me/me.module';
 import { User } from './users/user.entity';
 import { Challenge } from './challenges/challenge.entity';
+import { Enrollment } from './enrollments/enrollment.entity';
 
 @Module({
   imports: [
@@ -17,13 +20,15 @@ import { Challenge } from './challenges/challenge.entity';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.getOrThrow<string>('DATABASE_URL'),
-        entities: [User, Challenge],
+        entities: [User, Challenge, Enrollment],
         synchronize: false,
       }),
     }),
     UsersModule,
     AuthModule,
     ChallengesModule,
+    EnrollmentsModule,
+    MeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

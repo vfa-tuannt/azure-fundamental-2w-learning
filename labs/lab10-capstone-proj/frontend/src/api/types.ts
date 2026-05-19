@@ -50,3 +50,29 @@ export interface ListChallengesParams {
   status?: ChallengeStatus
   skill?: string
 }
+
+export type EnrollmentStatus =
+  | 'in_progress'
+  | 'submitted'
+  | 'approved'
+  | 'rejected'
+
+export interface Enrollment {
+  id: string
+  challengeId: string
+  userId: string
+  status: EnrollmentStatus
+  enrolledAt: string
+}
+
+export interface MyEnrollmentChallengeSummary {
+  id: string
+  title: string
+  deadline: string
+  status: ChallengeStatus
+  requiredSkills: string[]
+}
+
+export interface MyEnrollment extends Enrollment {
+  challenge: MyEnrollmentChallengeSummary
+}
