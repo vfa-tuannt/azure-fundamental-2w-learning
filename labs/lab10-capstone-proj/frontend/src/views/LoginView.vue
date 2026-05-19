@@ -1,5 +1,27 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Button from 'primevue/button'
+import Message from 'primevue/message'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
+const route = useRoute()
+
+const errorMessage = computed(() => {
+  switch (route.query.error) {
+    case 'domain':
+      return 'Only @vitalify.asia Google Workspace accounts can sign in.'
+    case 'missing_token':
+      return 'Authentication did not complete. Please try again.'
+    default:
+      return null
+  }
+})
+
+function handleLogin() {
+  auth.login()
+}
 </script>
 
 <template>
@@ -17,11 +39,16 @@ import Button from 'primevue/button'
         <p class="mt-1 text-sm text-slate-600">Sign in to access the platform</p>
       </div>
 
+      <Message v-if="errorMessage" severity="error" :closable="false" class="!mt-5">
+        {{ errorMessage }}
+      </Message>
+
       <Button
         label="Sign in with Google"
         icon="pi pi-google"
         class="!mt-6 w-full"
         severity="primary"
+        @click="handleLogin"
       />
       <p class="mt-3 text-center text-xs text-slate-500">
         Only @vitalify.asia accounts are allowed.
