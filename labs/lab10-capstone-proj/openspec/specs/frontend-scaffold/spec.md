@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the foundational frontend scaffolding requirements: Vue 3 + PrimeVue + Tailwind responsive shell, mobile-first navigation, routing, Axios configuration, and build verification.
-
 ## Requirements
-
 ### Requirement: PrimeVue base layout
 The system SHALL render a persistent application shell consisting of a top navbar (containing logo on the left and profile avatar on the right) and a main content area. Navigation SHALL be presented through PrimeVue components (`Avatar`, `Button`, `Drawer`) and the layout SHALL be present on all routes except `/login`.
 
@@ -46,7 +44,7 @@ The system SHALL use Tailwind CSS v4 (via `@tailwindcss/vite`) for layout, spaci
 - **THEN** the color resolves to the PrimeVue Lara primary palette at runtime
 
 ### Requirement: Application routing
-The system SHALL define the following client-side routes using Vue Router: `/` (home/redirect), `/login`, `/auth/callback`, `/challenges`, `/challenges/:id`, `/me`. Navigation between routes SHALL work without a full-page reload.
+The system SHALL define the following client-side routes using Vue Router: `/` (home/redirect), `/login`, `/auth/callback`, `/challenges`, `/challenges/new`, `/challenges/:id`, `/challenges/:id/edit`, `/me`. Navigation between routes SHALL work without a full-page reload. The `/challenges/new` and `/challenges/:id/edit` routes SHALL require authentication via the existing global navigation guard; unauthenticated visitors SHALL be redirected to `/login`.
 
 #### Scenario: Route navigation without reload
 - **WHEN** a user clicks a navigation link to `/challenges`
@@ -59,6 +57,14 @@ The system SHALL define the following client-side routes using Vue Router: `/` (
 #### Scenario: Auth callback route is reachable without authentication
 - **WHEN** an unauthenticated user navigates to `/auth/callback?token=<jwt>`
 - **THEN** the route renders the `AuthCallbackView` component without being intercepted by the auth guard
+
+#### Scenario: Challenge form routes require authentication
+- **WHEN** an unauthenticated user navigates to `/challenges/new` or `/challenges/:id/edit`
+- **THEN** the global navigation guard redirects them to `/login`
+
+#### Scenario: Challenge form routes accessible when authenticated
+- **WHEN** an authenticated user navigates to `/challenges/new` or `/challenges/:id/edit`
+- **THEN** the corresponding `ChallengeFormView` component renders inside the application shell
 
 ### Requirement: Axios API client configuration
 The system SHALL provide a pre-configured Axios instance with `baseURL` set from the `VITE_API_URL` environment variable. All API calls in the application SHALL use this shared instance. The instance SHALL include a request interceptor that attaches `Authorization: Bearer <token>` from `localStorage` when present, and a response interceptor that clears the session and redirects to `/login` on HTTP 401.
@@ -96,3 +102,4 @@ The system SHALL render the base layout correctly in a browser and all defined r
 #### Scenario: All routes accessible
 - **WHEN** a developer navigates to `/challenges`, `/me`, and `/login`
 - **THEN** each route renders its corresponding view without errors
+

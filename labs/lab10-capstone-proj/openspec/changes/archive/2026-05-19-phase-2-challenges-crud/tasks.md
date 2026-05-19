@@ -97,10 +97,10 @@
 ## 13. Frontend — Verification
 
 - [x] 13.1 Run `yarn build` and confirm exit code 0 (typecheck + bundle clean)
-- [ ] 13.2 With both BE (`yarn start:dev`) and FE (`yarn dev`) running, visit `/challenges` while logged out — confirm the table loads (public) and the "Create Challenge" button is hidden
-- [ ] 13.3 Log in as a Vitalify user, click "Create Challenge", fill the form (including a markdown description with headers + code block), submit — confirm redirect to detail page with the description rendered as HTML
-- [ ] 13.4 Confirm the new challenge appears in the list page; use the skill filter (case-insensitive substring) and the status filter; use the paginator
-- [ ] 13.5 As the owner, click "Edit", change the title and deadline, save — confirm the detail page reflects the updates
-- [ ] 13.6 As the owner, click "Delete", confirm — confirm redirect to list and the challenge no longer appears (verify in pgAdmin: `deleted_at IS NOT NULL`)
-- [ ] 13.7 As a different Vitalify account, attempt `PATCH /challenges/:id` and `DELETE /challenges/:id` via `curl` for someone else's challenge — confirm HTTP 403
+- [x] 13.2 With both BE (`yarn start:dev`) and FE (`yarn dev`) running, visit `/challenges` while logged out — confirm the table loads (public) and the "Create Challenge" button is hidden
+- [x] 13.3 Log in as a Vitalify user, click "Create Challenge", fill the form (including a markdown description with headers + code block), submit — confirm redirect to detail page with the description rendered as HTML
+- [x] 13.4 Confirm the new challenge appears in the list page; use the skill filter (case-insensitive substring) and the status filter; use the paginator
+- [x] 13.5 As the owner, click "Edit", change the title and deadline, save — confirm the detail page reflects the updates
+- [x] 13.6 As the owner, click "Delete", confirm — confirm redirect to list and the challenge no longer appears (verify in pgAdmin: `deleted_at IS NOT NULL`)
+- [x] 13.7 As a different Vitalify account, attempt `PATCH /challenges/:id` and `DELETE /challenges/:id` via `curl` for someone else's challenge — confirm HTTP 403
 - [x] 13.8 Confirm `GET /challenges?status=archived` and `GET /challenges?limit=999` both return HTTP 400

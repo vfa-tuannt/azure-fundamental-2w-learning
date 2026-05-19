@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the frontend authentication requirements: Pinia auth store, JWT persistence in localStorage, Axios interceptors, route guards, OAuth callback handler, login page, and navbar auth state.
-
 ## Requirements
-
 ### Requirement: Pinia auth store
 The system SHALL provide a Pinia store `authStore` exposing reactive state `user` (object or null), `token` (string or null), and `isAuthenticated` (boolean derived from `token !== null`), plus actions `login()`, `logout()`, and `fetchMe()`.
 
@@ -54,11 +52,23 @@ The system SHALL configure two Axios interceptors on the shared client (`src/api
 - **THEN** the response interceptor invokes `authStore.logout()` and the user is redirected to `/login`
 
 ### Requirement: Route guard for protected routes
-The system SHALL register a Vue Router `beforeEach` global navigation guard that redirects unauthenticated users to `/login`. The guard SHALL exempt only `/login` and `/auth/callback`.
+The system SHALL register a Vue Router `beforeEach` global navigation guard that redirects unauthenticated users to `/login`. Routes that should be reachable without authentication SHALL declare `meta.public: true` in the router definition; the guard SHALL allow any route with `meta.public === true` and require authentication for everything else. The routes that SHALL be marked public are `/login`, `/auth/callback`, `/challenges`, and `/challenges/:id`. All other routes (including `/challenges/new`, `/challenges/:id/edit`, and `/me`) require authentication.
 
-#### Scenario: Unauthenticated user blocked from /challenges
+#### Scenario: Public challenges list reachable without auth
 - **WHEN** a user with no token navigates to `/challenges`
-- **THEN** the router redirects to `/login` and the challenges view does not render
+- **THEN** the router allows the navigation and the challenges list view renders without redirect
+
+#### Scenario: Public challenge detail reachable without auth
+- **WHEN** a user with no token navigates to `/challenges/<id>`
+- **THEN** the router allows the navigation and the detail view renders without redirect
+
+#### Scenario: Challenge form routes require authentication
+- **WHEN** a user with no token navigates to `/challenges/new` or `/challenges/<id>/edit`
+- **THEN** the router redirects to `/login`
+
+#### Scenario: Unauthenticated user blocked from /me
+- **WHEN** a user with no token navigates to `/me`
+- **THEN** the router redirects to `/login`
 
 #### Scenario: Authenticated user accesses protected route
 - **WHEN** a user with a valid token navigates to `/me`
@@ -100,3 +110,4 @@ The system SHALL display the authenticated user's avatar (`avatar_url` if availa
 #### Scenario: Logout action clears session
 - **WHEN** an authenticated user clicks the logout action in the navbar
 - **THEN** `authStore.logout()` runs, the token is cleared from `localStorage`, and the user is redirected to `/login`
+
