@@ -43,7 +43,7 @@ The system SHALL include a `.env.example` file committed to version control list
 - **THEN** `.env.example` exists and lists `DATABASE_URL` and `CORS_ORIGIN` with example values
 
 ### Requirement: Linting and tests pass on CI
-The system SHALL have a GitHub Actions CI workflow that runs `npm run lint` and `npm run test` for the backend on every push and pull request to `main`, and the workflow SHALL succeed on a clean checkout.
+The system SHALL have a GitHub Actions CI workflow that runs `yarn lint` and `yarn test` for the backend on every push and pull request to `main`, and the workflow SHALL succeed on a clean checkout.
 
 #### Scenario: CI lint job passes
 - **WHEN** code is pushed to `main`

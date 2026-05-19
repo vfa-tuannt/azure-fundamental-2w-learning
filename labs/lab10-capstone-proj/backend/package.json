@@ -87,5 +87,11 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "engines": {
+    "node": "24.13.0",
+    "yarn": "1.22.22",
+    "npm": "please-use-yarn"
+  },
+  "packageManager": "yarn@1.22.22"
 }

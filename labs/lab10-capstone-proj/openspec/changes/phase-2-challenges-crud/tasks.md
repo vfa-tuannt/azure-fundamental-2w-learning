@@ -2,15 +2,15 @@
 
 - [x] 1.1 Install backend packages: `class-validator`, `class-transformer`
 - [x] 1.2 In `backend/src/main.ts`, register a global `ValidationPipe` with `{ whitelist: true, forbidNonWhitelisted: true, transform: true, transformOptions: { enableImplicitConversion: true } }`
-- [x] 1.3 Confirm `app.useGlobalPipes(...)` runs before `app.listen()` and that `npm run start:dev` still boots clean
+- [x] 1.3 Confirm `app.useGlobalPipes(...)` runs before `app.listen()` and that `yarn start:dev` still boots clean
 
 ## 2. Backend — Challenge Entity and Migration
 
 - [x] 2.1 Create `backend/src/challenges/challenge.entity.ts` with `Challenge`: `id` (`@PrimaryGeneratedColumn('uuid')`), `ownerId` (`@Column('uuid')`), `owner` (`@ManyToOne(() => User)` with `JoinColumn({ name: 'owner_id' })`), `title` (`@Column('varchar')`), `description` (`@Column('text')`), `requiredSkills` (`@Column('text', { array: true, default: '{}' })`), `deadline` (`@Column('timestamptz')`), `maxEnrollments` (`@Column('int', { nullable: true })`), `status` (`@Column({ type: 'enum', enum: ChallengeStatus, default: ChallengeStatus.OPEN })`), `createdAt` (`@CreateDateColumn()`), `deletedAt` (`@DeleteDateColumn()`)
 - [x] 2.2 Add a `ChallengeStatus` TypeScript enum (`OPEN = 'open'`, `CLOSED = 'closed'`) and the matching Postgres enum name `challenge_status`
 - [x] 2.3 Register `Challenge` in `data-source.ts` `entities` array
-- [x] 2.4 Generate migration: `npm run migration:generate -- ./src/migrations/CreateChallengesTable`; review the generated SQL to ensure: enum type, FK to `users.id` with `ON DELETE RESTRICT`, index on `(status, deleted_at, created_at DESC)`, and a `GIN` index on `required_skills`. Hand-add the GIN index in the migration if TypeORM did not emit it.
-- [x] 2.5 Run `npm run migration:run`; verify in pgAdmin that the `challenges` table, the enum, and both indexes exist
+- [x] 2.4 Generate migration: `yarn migration:generate ./src/migrations/CreateChallengesTable`; review the generated SQL to ensure: enum type, FK to `users.id` with `ON DELETE RESTRICT`, index on `(status, deleted_at, created_at DESC)`, and a `GIN` index on `required_skills`. Hand-add the GIN index in the migration if TypeORM did not emit it.
+- [x] 2.5 Run `yarn migration:run`; verify in pgAdmin that the `challenges` table, the enum, and both indexes exist
 - [x] 2.6 Spot-check the migration's `down()` drops the table, the indexes, and the enum cleanly
 
 ## 3. Backend — Challenges DTOs
@@ -48,7 +48,7 @@
 - [x] 6.3 Unit test `ChallengesService.remove`: calls `softRemove` for the owner; throws `ForbiddenException` for non-owner; throws `NotFoundException` when already soft-deleted
 - [x] 6.4 Unit test `ChallengesService.findAll`: returns paginated result with `total`; respects `status` and `skill` filters; excludes soft-deleted rows
 - [x] 6.5 E2E (or supertest controller test): `POST /challenges` without JWT → 401; with invalid body → 400; with valid body + JWT → 201; `GET /challenges` works without auth and returns paginated results; `PATCH/DELETE` non-owner → 403
-- [x] 6.6 Run `npm run lint`, `npm run test`, and `npx tsc --noEmit` — all clean
+- [x] 6.6 Run `yarn lint`, `yarn test`, and `yarn tsc --noEmit` — all clean
 
 ## 7. Frontend — Dependencies and Types
 
@@ -97,7 +97,7 @@
 ## 13. Frontend — Verification
 
 - [x] 13.1 Run `yarn build` and confirm exit code 0 (typecheck + bundle clean)
-- [ ] 13.2 With both BE (`npm run start:dev`) and FE (`yarn dev`) running, visit `/challenges` while logged out — confirm the table loads (public) and the "Create Challenge" button is hidden
+- [ ] 13.2 With both BE (`yarn start:dev`) and FE (`yarn dev`) running, visit `/challenges` while logged out — confirm the table loads (public) and the "Create Challenge" button is hidden
 - [ ] 13.3 Log in as a Vitalify user, click "Create Challenge", fill the form (including a markdown description with headers + code block), submit — confirm redirect to detail page with the description rendered as HTML
 - [ ] 13.4 Confirm the new challenge appears in the list page; use the skill filter (case-insensitive substring) and the status filter; use the paginator
 - [ ] 13.5 As the owner, click "Edit", change the title and deadline, save — confirm the detail page reflects the updates

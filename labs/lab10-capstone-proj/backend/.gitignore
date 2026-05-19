@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# package manager: yarn only (1.22.22). Block npm lockfile so a stray `npm install` cannot be committed.
+package-lock.json
+
 # Logs
 logs
 *.log

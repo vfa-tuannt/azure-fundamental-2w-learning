@@ -19,14 +19,14 @@
 
 - [x] 3.1 Add `GET /health` route to `AppController` returning `{ status: 'ok' }` with HTTP 200
 - [x] 3.2 Enable CORS in `main.ts` with origin from `process.env.CORS_ORIGIN ?? 'http://localhost:5173'`
-- [x] 3.3 Verify `curl http://localhost:3000/health` returns `{ "status": "ok" }` after `npm run start:dev`
+- [x] 3.3 Verify `curl http://localhost:3000/health` returns `{ "status": "ok" }` after `yarn start:dev`
 
 ## 4. Backend — Linting and Tests
 
 - [x] 4.1 Confirm ESLint flat config (`eslint.config.mjs`) covers `src/**/*.ts` and `test/**/*.ts`
-- [x] 4.2 Run `npm run lint` and fix any existing lint errors
-- [x] 4.3 Run `npm run test` and confirm the default AppController spec passes
-- [x] 4.4 Run typecheck (`npx tsc --noEmit`) and fix any type errors
+- [x] 4.2 Run `yarn lint` and fix any existing lint errors
+- [x] 4.3 Run `yarn test` and confirm the default AppController spec passes
+- [x] 4.4 Run typecheck (`yarn tsc --noEmit`) and fix any type errors
 
 ## 5. Frontend — PrimeVue and Axios Setup
 
@@ -54,13 +54,13 @@
 
 ## 8. Frontend — Build and Typecheck
 
-- [x] 8.1 Run `npm run build` and confirm it exits 0 with no TypeScript errors
+- [x] 8.1 Run `yarn build` and confirm it exits 0 with no TypeScript errors
 - [x] 8.2 Run `vue-tsc --build` (typecheck) and fix any type errors
 - [x] 8.3 Open `http://localhost:5173` in browser and confirm layout renders, all 5 routes navigate correctly, and no console errors appear
 
 ## 9. CI — GitHub Actions
 
-- [x] 9.1 Create `.github/workflows/ci.yml` with a `backend` job: checkout → Node 24 setup → `npm ci` → `npm run lint` → `npm run test`
-- [x] 9.2 Add a `frontend` job to the same workflow: checkout → Node 24 setup → `npm ci` → `npm run type-check` → `npm run build`
+- [x] 9.1 Create `.github/workflows/ci.yml` with a `backend` job: checkout → Node 24 setup → `yarn install --frozen-lockfile` → `yarn lint` → `yarn test`
+- [x] 9.2 Add a `frontend` job to the same workflow: checkout → Node 24 setup → `yarn install --frozen-lockfile` → `yarn type-check` → `yarn build`
 - [x] 9.3 Set workflow trigger to `push` and `pull_request` on `main`
 - [ ] 9.4 Push to `main` and verify both jobs pass in GitHub Actions

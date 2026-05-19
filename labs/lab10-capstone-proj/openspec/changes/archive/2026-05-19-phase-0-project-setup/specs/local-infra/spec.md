@@ -26,5 +26,5 @@ The system SHALL configure named Docker volumes for Postgres data so that databa
 The Docker Compose Postgres service credentials SHALL match the `DATABASE_URL` value in `.env.example` so developers can copy `.env.example` to `.env` and connect immediately without modification.
 
 #### Scenario: Default credentials work
-- **WHEN** a developer copies `.env.example` to `.env` and runs `npm run start:dev`
+- **WHEN** a developer copies `.env.example` to `.env` and runs `yarn start:dev`
 - **THEN** the NestJS app connects to the Docker Compose Postgres without any credential changes

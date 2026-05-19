@@ -11,9 +11,9 @@
 - [x] 2.1 Create `User` entity at `backend/src/users/user.entity.ts` with columns `id` (uuid PK), `email` (unique, not null), `name`, `avatarUrl` (nullable), `createdAt`
 - [x] 2.2 Add a `UsersService` with `findByEmail(email)` and `upsertFromGoogleProfile({ email, name, avatarUrl })` methods
 - [x] 2.3 Create `UsersModule` exporting `UsersService` and the TypeORM repository
-- [x] 2.4 Configure TypeORM migrations: add `migration:generate` and `migration:run` npm scripts; create `data-source.ts` for the CLI
+- [x] 2.4 Configure TypeORM migrations: add `migration:generate` and `migration:run` yarn scripts; create `data-source.ts` for the CLI
 - [x] 2.5 Generate migration `CreateUsersTable`; verify it adds `users` table with the unique constraint on `email`
-- [x] 2.6 Run `npm run migration:run` against the local Docker Compose Postgres and confirm the table exists via pgAdmin
+- [x] 2.6 Run `yarn migration:run` against the local Docker Compose Postgres and confirm the table exists via pgAdmin
 
 ## 3. Backend — Auth Module (Google Strategy)
 
@@ -39,7 +39,7 @@
 - [x] 5.1 Unit test: `GoogleStrategy.validate` with a non-vitalify email throws `ForbiddenException`
 - [x] 5.2 Unit test: `GoogleStrategy.validate` with a vitalify email returns the upserted user
 - [x] 5.3 E2E or controller test: `GET /auth/me` returns 401 without token, 200 with valid token
-- [x] 5.4 Run `npm run lint`, `npm run test`, and `npx tsc --noEmit` — all clean
+- [x] 5.4 Run `yarn lint`, `yarn test`, and `yarn tsc --noEmit` — all clean
 
 ## 6. Frontend — Dependencies and Types
 

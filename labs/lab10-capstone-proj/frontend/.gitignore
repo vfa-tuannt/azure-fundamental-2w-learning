@@ -15,6 +15,9 @@ coverage
 *.local
 .env
 
+# package manager: yarn only (1.22.22). Block npm lockfile so a stray `npm install` cannot be committed.
+package-lock.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

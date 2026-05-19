@@ -4,7 +4,7 @@
 The system SHALL persist challenges in a `challenges` table with the following columns: `id` (uuid, primary key), `owner_id` (uuid, not null, foreign key to `users.id`), `title` (varchar, not null), `description` (text, not null), `required_skills` (text array, not null, defaults to empty array), `deadline` (timestamptz, not null), `max_enrollments` (integer, nullable), `status` (Postgres enum `challenge_status` with values `open` and `closed`, not null, defaults to `open`), `created_at` (timestamptz, not null, defaults to `now()`), and `deleted_at` (timestamptz, nullable). The table SHALL be created via a TypeORM migration.
 
 #### Scenario: Migration creates challenges table and enum
-- **WHEN** `npm run migration:run` is executed against a database that already contains the `users` table
+- **WHEN** `yarn migration:run` is executed against a database that already contains the `users` table
 - **THEN** the `challenge_status` enum type and the `challenges` table are created with all required columns, the foreign key to `users.id`, an index on `(status, deleted_at, created_at DESC)`, and a GIN index on `required_skills`
 
 #### Scenario: Deleting a referenced user is blocked

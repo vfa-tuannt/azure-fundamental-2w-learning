@@ -63,7 +63,7 @@ The system SHALL provide a `JwtAuthGuard` (NestJS guard) that validates `Authori
 The system SHALL persist Vitalify users in a `users` table with columns `id` (uuid, primary key), `email` (varchar, unique, not null), `name` (varchar, not null), `avatar_url` (varchar, nullable), and `created_at` (timestamptz, default `now()`). The table SHALL be created via a TypeORM migration.
 
 #### Scenario: Migration creates users table
-- **WHEN** `npm run migration:run` is executed against an empty database
+- **WHEN** `yarn migration:run` is executed against an empty database
 - **THEN** the `users` table is created with all required columns and the `email` column has a unique constraint
 
 #### Scenario: Duplicate email is prevented at the database level

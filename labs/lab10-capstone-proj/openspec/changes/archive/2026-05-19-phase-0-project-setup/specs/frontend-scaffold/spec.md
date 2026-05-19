@@ -58,10 +58,10 @@ The system SHALL provide a pre-configured Axios instance with `baseURL` set from
 - **THEN** all Axios requests are sent relative to that base URL
 
 ### Requirement: Build succeeds with no TypeScript errors
-The system SHALL produce a production build (`npm run build`) that completes successfully with no TypeScript compilation errors.
+The system SHALL produce a production build (`yarn build`) that completes successfully with no TypeScript compilation errors.
 
 #### Scenario: Clean build
-- **WHEN** `npm run build` is executed on a fresh checkout with dependencies installed
+- **WHEN** `yarn build` is executed on a fresh checkout with dependencies installed
 - **THEN** the build completes with exit code 0 and outputs to `dist/`
 
 #### Scenario: Typecheck passes

@@ -13,7 +13,8 @@ An internal web platform that allows Vitalify members to **post skill challenges
 - API contracts defined via **[OpenSpec](https://openspec.dev) change proposals** before coding each phase.
 
 **Tech stack:**
-- **Backend:** NestJS (Node 24 LTS), TypeORM, PostgreSQL 16
+- **Runtime:** Node 24.13.0 (pinned in `.nvmrc`), package manager **yarn 1.22.22** (npm is not used)
+- **Backend:** NestJS 11, TypeORM, PostgreSQL 16
 - **Frontend:** Vue 3 (Vite), TypeScript, PrimeVue, Pinia
 - **Local infra:** Docker Compose (Postgres 16 + pgAdmin + Azurite)
 - **IaC:** Terraform (HCL)
@@ -75,7 +76,7 @@ Each Phase 1–6 follows this workflow:
 - [ ] `docker-compose.yml` runs: `postgres:16`, `pgadmin4`, `azurite` (blob emulator)
 - [ ] `GET /health` returns `{ status: "ok" }` with HTTP 200
 - [ ] CORS configured: allow `http://localhost:5173` in dev; production origin injected via `CORS_ORIGIN` env var
-- [ ] `npm run test` and `npm run lint` pass on CI (GitHub Actions)
+- [ ] `yarn test` and `yarn lint` pass on CI (GitHub Actions)
 - [ ] `.env.example` committed; `.env` in `.gitignore`
 - [ ] Typecheck passes
 
@@ -87,7 +88,7 @@ Each Phase 1–6 follows this workflow:
 - [ ] Base layout: top navbar (logo, profile avatar placeholder) + left sidebar + main content area
 - [ ] Routes defined: `/`, `/login`, `/challenges`, `/challenges/:id`, `/me`
 - [ ] Axios instance configured with base URL from `VITE_API_URL` env var
-- [ ] `npm run build` succeeds with no TS errors
+- [ ] `yarn build` succeeds with no TS errors
 - [ ] Typecheck and lint pass
 - [ ] Verify in browser: layout renders, routes navigate without errors
 
@@ -333,7 +334,7 @@ Each Phase 1–6 follows this workflow:
 
 **Acceptance Criteria:**
 - [ ] Terraform provisions Azure Static Web App (Free tier)
-- [ ] GitHub Actions workflow: `npm run build` → deploy; `VITE_API_URL` set to APIM URL
+- [ ] GitHub Actions workflow: `yarn build` → deploy; `VITE_API_URL` set to APIM URL
 - [ ] Frontend accessible at `<staticwebapp>.azurestaticapps.net`
 - [ ] SPA routing works (404 → serve `index.html`)
 
@@ -532,16 +533,18 @@ submission_events  partition key: /submissionId
 
 ## 9. Local Development Setup
 
+> **Toolchain:** Node 24.13.0 (`nvm use`) and yarn 1.22.22. Do not use npm.
+
 ```bash
 # Start all local services
-docker-compose up -d
+docker compose up -d
 # postgres:16 on :5432, pgAdmin on :5050, Azurite on :10000-10002
 
 # Backend
-cd backend && npm install && npm run migration:run && npm run start:dev
+cd backend && yarn install && yarn migration:run && yarn start:dev
 
 # Frontend
-cd frontend && npm install && npm run dev
+cd frontend && yarn install && yarn dev
 
 # Azure Functions (local, separate terminal)
 cd functions && pip install -r requirements.txt && func start

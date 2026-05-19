@@ -11,12 +11,12 @@ Current state:
 ## Goals / Non-Goals
 
 **Goals:**
-- Backend runnable via `npm run start:dev` with a Postgres connection from `.env`
+- Backend runnable via `yarn start:dev` with a Postgres connection from `.env`
 - `GET /health` returns `{ status: "ok" }` with HTTP 200
 - CORS allows `http://localhost:5173` in dev; overridable via `CORS_ORIGIN` env var
-- `npm run lint` and `npm run test` pass on CI (GitHub Actions)
+- `yarn lint` and `yarn test` pass on CI (GitHub Actions)
 - Frontend renders base layout (navbar, sidebar, content) and all 5 routes navigate without errors
-- `npm run build` succeeds with no TypeScript errors
+- `yarn build` succeeds with no TypeScript errors
 - Docker Compose starts Postgres 16, pgAdmin, and Azurite with a single `docker-compose up -d`
 
 **Non-Goals:**
