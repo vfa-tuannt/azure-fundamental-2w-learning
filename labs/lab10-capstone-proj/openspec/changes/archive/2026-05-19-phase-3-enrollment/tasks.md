@@ -122,14 +122,14 @@
 
 ## 15. Browser Verification
 
-- [ ] 15.1 With two `@vitalify.asia` Google accounts in separate browsers, sign in to both; Account A creates a challenge with `max_enrollments: 1`
-- [ ] 15.2 Account B opens the detail page and clicks Enroll → confirm green Toast, count chip changes to `1/1`, button switches to Withdraw without a page reload
-- [ ] 15.3 Account A loads the same detail page → confirm "You own this challenge" hint and no Enroll button
-- [ ] 15.4 A third account opens the detail page → confirm a disabled "Full" button (cap reached)
-- [ ] 15.5 Account B clicks Withdraw, confirms the dialog → confirm count chip back to `0/1` and button switches back to Enroll
-- [ ] 15.6 Account B clicks Enroll again → confirm a fresh enrollment is created (no error from any stale state)
-- [ ] 15.7 Account A patches the challenge to `status: closed` → reload detail page on Account C → confirm a disabled "Closed" button
-- [ ] 15.8 Visit `/me` on Account B → confirm the profile header renders and the My Challenges table shows the enrollment with the correct title, skills, deadline, and status badge
-- [ ] 15.9 Account A soft-deletes the challenge → reload `/me` on Account B → confirm the enrollment row disappears from the list
-- [ ] 15.10 Refresh the detail page after enrolling → confirm the Withdraw button is still shown (proves the per-challenge fetch hydrates correctly on cold load)
-- [ ] 15.11 Open `/challenges` while signed out → confirm the `Enrolled/Max` column on every row shows the real count, not `0`
+- [x] 15.1 With two `@vitalify.asia` Google accounts in separate browsers, sign in to both; Account A creates a challenge with `max_enrollments: 1`
+- [x] 15.2 Account B opens the detail page and clicks Enroll → confirm green Toast, count chip changes to `1/1`, button switches to Withdraw without a page reload
+- [x] 15.3 Account A loads the same detail page → confirm "You own this challenge" hint and no Enroll button
+- [x] 15.4 A third account opens the detail page → confirm a disabled "Full" button (cap reached)
+- [x] 15.5 Account B clicks Withdraw, confirms the dialog → confirm count chip back to `0/1` and button switches back to Enroll
+- [x] 15.6 Account B clicks Enroll again → confirm a fresh enrollment is created (no error from any stale state)
+- [x] 15.7 Account A patches the challenge to `status: closed` → reload detail page on Account C → confirm a disabled "Closed" button
+- [x] 15.8 Visit `/me` on Account B → confirm the profile header renders and the My Challenges table shows the enrollment with the correct title, skills, deadline, and status badge
+- [x] 15.9 Account A soft-deletes the challenge → reload `/me` on Account B → confirm the enrollment row disappears from the list
+- [x] 15.10 Refresh the detail page after enrolling → confirm the Withdraw button is still shown (proves the per-challenge fetch hydrates correctly on cold load)
+- [x] 15.11 Open `/challenges` while signed out → confirm the `Enrolled/Max` column on every row shows the real count, not `0`
