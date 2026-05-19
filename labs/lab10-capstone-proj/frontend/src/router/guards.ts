@@ -1,10 +1,8 @@
 import type { NavigationGuard } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-const PUBLIC_ROUTES = new Set(['/login', '/auth/callback'])
-
 export const authGuard: NavigationGuard = (to) => {
-  if (PUBLIC_ROUTES.has(to.path)) {
+  if (to.meta?.public === true) {
     return true
   }
   const auth = useAuthStore()

@@ -29,7 +29,8 @@ Phase 1 gave the platform an authenticated identity but nothing to do with it â€
 - `frontend-challenges`: Challenge list page (DataTable + filters + pagination), detail page (markdown viewer), create/edit form (markdown editor + validation), router entries for `/challenges/new` and `/challenges/:id/edit`
 
 ### Modified Capabilities
-- `frontend-scaffold`: the existing placeholder routes `/challenges` and `/challenges/:id` (declared in Phase 0) gain real views; two new routes (`/challenges/new`, `/challenges/:id/edit`) are added under the same auth guard
+- `frontend-scaffold`: the existing placeholder routes `/challenges` and `/challenges/:id` (declared in Phase 0) gain real views; two new routes (`/challenges/new`, `/challenges/:id/edit`) are added with explicit auth gating
+- `frontend-auth`: the global navigation guard relaxes from a fixed allowlist (`/login`, `/auth/callback`) to a route-meta-driven policy (`meta.public === true` is public; everything else requires auth) so that `/challenges` and `/challenges/:id` can be browsed while logged out â€” matching the public BE endpoints
 
 ## Impact
 

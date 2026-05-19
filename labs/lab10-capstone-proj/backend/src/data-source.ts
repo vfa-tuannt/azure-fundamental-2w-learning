@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { User } from './users/user.entity';
+import { Challenge } from './challenges/challenge.entity';
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ if (!databaseUrl) {
 export default new DataSource({
   type: 'postgres',
   url: databaseUrl,
-  entities: [User],
+  entities: [User, Challenge],
   migrations: ['src/migrations/*.ts'],
   migrationsTableName: 'migrations',
 });
