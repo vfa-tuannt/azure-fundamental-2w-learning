@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import api from '@/api/axios'
 import type { User } from '@/api/types'
 import { useEnrollmentsStore } from '@/stores/enrollments'
+import { useSubmissionsStore } from '@/stores/submissions'
 
 const TOKEN_KEY = 'auth_token'
 
@@ -36,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
     setToken(null)
     user.value = null
     useEnrollmentsStore().reset()
+    useSubmissionsStore().reset()
     if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
       window.location.href = '/login'
     }

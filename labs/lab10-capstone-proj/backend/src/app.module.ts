@@ -11,6 +11,8 @@ import { MeModule } from './me/me.module';
 import { User } from './users/user.entity';
 import { Challenge } from './challenges/challenge.entity';
 import { Enrollment } from './enrollments/enrollment.entity';
+import { Submission } from './submissions/submission.entity';
+import { SubmissionsModule } from './submissions/submissions.module';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { Enrollment } from './enrollments/enrollment.entity';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.getOrThrow<string>('DATABASE_URL'),
-        entities: [User, Challenge, Enrollment],
+        entities: [User, Challenge, Enrollment, Submission],
         synchronize: false,
       }),
     }),
@@ -29,6 +31,7 @@ import { Enrollment } from './enrollments/enrollment.entity';
     ChallengesModule,
     EnrollmentsModule,
     MeModule,
+    SubmissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

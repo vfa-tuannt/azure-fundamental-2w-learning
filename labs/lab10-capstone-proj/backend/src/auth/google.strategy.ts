@@ -5,12 +5,12 @@ import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.entity';
 
-const VITALIFY_DOMAIN = '@vitalify.asia';
-
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+  private readonly allowedDomains: string[];
+
   constructor(
-    config: ConfigService,
+    private readonly config: ConfigService,
     private readonly usersService: UsersService,
   ) {
     super({
@@ -19,6 +19,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: config.getOrThrow<string>('GOOGLE_CALLBACK_URL'),
       scope: ['email', 'profile'],
     });
+    this.allowedDomains = (
+      config.get<string>('AUTH_ALLOWED_DOMAINS') ?? 'vitalify.asia'
+    )
+      .split(',')
+      .map((d) => d.trim())
+      .filter(Boolean);
   }
 
   async validate(
@@ -29,9 +35,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<void> {
     try {
       const email = profile.emails?.[0]?.value;
-      if (!email || !email.endsWith(VITALIFY_DOMAIN)) {
+      const domainAllowed =
+        !!email && this.allowedDomains.some((d) => email.endsWith('@' + d));
+      if (!domainAllowed) {
         throw new ForbiddenException(
-          `Only ${VITALIFY_DOMAIN} accounts are allowed`,
+          `Only ${this.allowedDomains.map((d) => '@' + d).join(', ')} accounts are allowed`,
         );
       }
       const name = profile.displayName || email.split('@')[0];

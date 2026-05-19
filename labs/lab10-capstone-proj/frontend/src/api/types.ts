@@ -76,3 +76,12 @@ export interface MyEnrollmentChallengeSummary {
 export interface MyEnrollment extends Enrollment {
   challenge: MyEnrollmentChallengeSummary
 }
+
+export interface Submission {
+  id: string
+  enrollmentId: string
+  blobUrl: string | null
+  externalUrl: string | null
+  notes: string
+  submittedAt: string
+}

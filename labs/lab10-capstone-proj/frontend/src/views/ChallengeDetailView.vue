@@ -3,13 +3,18 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { MdPreview } from 'md-editor-v3'
 import Button from 'primevue/button'
+import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
+import InputText from 'primevue/inputtext'
+import SelectButton from 'primevue/selectbutton'
 import Tag from 'primevue/tag'
+import Textarea from 'primevue/textarea'
 import Skeleton from 'primevue/skeleton'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { deleteChallenge, getChallenge } from '@/api/challenges'
 import { useAuthStore } from '@/stores/auth'
 import { useEnrollmentsStore } from '@/stores/enrollments'
+import { useSubmissionsStore } from '@/stores/submissions'
 import type { Challenge } from '@/api/types'
 
 type ButtonState =
@@ -27,6 +32,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const enrollments = useEnrollmentsStore()
+const submissions = useSubmissionsStore()
 const confirm = useConfirm()
 const toast = useToast()
 
@@ -34,6 +40,17 @@ const challenge = ref<Challenge | null>(null)
 const loading = ref(true)
 const notFound = ref(false)
 const enrolling = ref(false)
+const submitting = ref(false)
+const submitMode = ref<'file' | 'url'>('file')
+const submitModeOptions = [
+  { label: 'File', value: 'file' as const },
+  { label: 'External URL', value: 'url' as const },
+]
+const selectedFile = ref<File | null>(null)
+const externalUrlInput = ref('')
+const notesInput = ref('')
+const MAX_FILE_BYTES = 25 * 1024 * 1024
+const ACCEPTED_EXTENSIONS = '.pdf,.png,.jpg,.jpeg,.zip,.md'
 
 const isOwner = computed(
   () =>
@@ -46,6 +63,44 @@ const myEnrollment = computed(() => {
   if (!challenge.value) return null
   return enrollments.byChallengeId.get(challenge.value.id) ?? null
 })
+
+const canShowSubmitPanel = computed(
+  () =>
+    !!myEnrollment.value &&
+    myEnrollment.value.status === 'in_progress' &&
+    !isOwner.value,
+)
+
+const mySubmissions = computed(() => {
+  const id = myEnrollment.value?.id
+  if (!id) return []
+  return submissions.byEnrollmentId.get(id) ?? []
+})
+
+const isFormValid = computed(() => {
+  if (submitMode.value === 'file') {
+    return !!selectedFile.value
+  }
+  if (!externalUrlInput.value) return false
+  try {
+    new URL(externalUrlInput.value)
+    return true
+  } catch {
+    return false
+  }
+})
+
+function fileLabel(blobUrl: string | null, externalUrl: string | null): string {
+  if (blobUrl) {
+    const last = blobUrl.split('/').pop() ?? ''
+    return decodeURIComponent(last).replace(/^[0-9a-f-]{36}-/, '')
+  }
+  return externalUrl ?? ''
+}
+
+function formatSubmittedAt(value: string): string {
+  return new Date(value).toLocaleString()
+}
 
 const buttonState = computed<ButtonState>(() => {
   if (!challenge.value) return 'sign-in-cta'
@@ -83,6 +138,10 @@ async function load() {
     challenge.value = await getChallenge(id)
     if (auth.isAuthenticated && !isOwner.value) {
       await enrollments.loadForChallenge(id)
+      const mine = enrollments.byChallengeId.get(id)
+      if (mine) {
+        await submissions.loadForEnrollment(mine.id)
+      }
     }
   } catch (err) {
     const status = (err as { response?: { status?: number } }).response?.status
@@ -225,6 +284,94 @@ async function performWithdraw() {
 function onSignIn() {
   auth.login()
 }
+
+function onFileSelect(event: FileUploadSelectEvent) {
+  const files = event.files as File[]
+  selectedFile.value = files[0] ?? null
+}
+
+function onFileClear() {
+  selectedFile.value = null
+}
+
+function resetSubmitForm() {
+  selectedFile.value = null
+  externalUrlInput.value = ''
+  notesInput.value = ''
+  submitMode.value = 'file'
+}
+
+async function onSubmit() {
+  if (!challenge.value || !myEnrollment.value) return
+  if (!isFormValid.value) {
+    toast.add({
+      severity: 'warn',
+      summary:
+        submitMode.value === 'file'
+          ? 'Please select a file before submitting'
+          : 'Please enter a valid URL before submitting',
+      life: 3000,
+    })
+    return
+  }
+
+  const enrollmentId = myEnrollment.value.id
+  submitting.value = true
+  try {
+    if (submitMode.value === 'file') {
+      await submissions.createFileSubmission(
+        enrollmentId,
+        selectedFile.value!,
+        notesInput.value || undefined,
+      )
+    } else {
+      await submissions.createUrlSubmission(
+        enrollmentId,
+        externalUrlInput.value,
+        notesInput.value || undefined,
+      )
+    }
+    const updated = enrollments.byChallengeId.get(challenge.value.id)
+    if (updated) {
+      enrollments.byChallengeId.set(challenge.value.id, {
+        ...updated,
+        status: 'submitted',
+      })
+    }
+    toast.add({
+      severity: 'success',
+      summary: 'Submission received',
+      life: 3000,
+    })
+    resetSubmitForm()
+  } catch (err) {
+    const status = (err as { response?: { status?: number } }).response?.status
+    if (status === 422) {
+      toast.add({
+        severity: 'error',
+        summary: 'File rejected',
+        detail: extractApiMessage(err),
+        life: 5000,
+      })
+    } else if (status === 409) {
+      toast.add({
+        severity: 'error',
+        summary: 'This enrollment is no longer in progress',
+        detail: 'Please refresh the page.',
+        life: 5000,
+      })
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Submission failed',
+        detail: extractApiMessage(err),
+        life: 5000,
+      })
+    }
+  } finally {
+    submitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -339,6 +486,100 @@ function onSignIn() {
 
       <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <MdPreview :model-value="challenge.description" />
+      </div>
+
+      <div
+        v-if="canShowSubmitPanel"
+        class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+      >
+        <h2 class="text-lg font-semibold text-slate-900">Submit Output</h2>
+        <p class="mt-1 text-sm text-slate-600">
+          Upload your output file or share an external link. Allowed file types:
+          PDF, PNG, JPG, ZIP, Markdown (max 25 MB).
+        </p>
+
+        <div class="mt-4 flex flex-col gap-4">
+          <SelectButton
+            v-model="submitMode"
+            :options="submitModeOptions"
+            option-label="label"
+            option-value="value"
+            :allow-empty="false"
+          />
+
+          <FileUpload
+            v-if="submitMode === 'file'"
+            mode="advanced"
+            :auto="false"
+            :show-upload-button="false"
+            :show-cancel-button="false"
+            choose-label="Choose file"
+            :accept="ACCEPTED_EXTENSIONS"
+            :max-file-size="MAX_FILE_BYTES"
+            :file-limit="1"
+            :multiple="false"
+            @select="onFileSelect"
+            @clear="onFileClear"
+            @remove="onFileClear"
+          />
+
+          <InputText
+            v-else
+            v-model="externalUrlInput"
+            type="url"
+            placeholder="https://github.com/example/repo"
+          />
+
+          <Textarea
+            v-model="notesInput"
+            rows="3"
+            placeholder="Optional notes for the reviewer"
+          />
+
+          <div class="flex justify-end">
+            <Button
+              label="Submit"
+              icon="pi pi-send"
+              :loading="submitting"
+              :disabled="!isFormValid"
+              @click="onSubmit"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="mySubmissions.length > 0"
+        class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+      >
+        <h2 class="text-lg font-semibold text-slate-900">My Submissions</h2>
+        <ul class="mt-3 space-y-3">
+          <li
+            v-for="submission in mySubmissions"
+            :key="submission.id"
+            class="rounded-md border border-slate-200 p-3"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <a
+                :href="submission.blobUrl ?? submission.externalUrl ?? '#'"
+                target="_blank"
+                rel="noopener"
+                class="break-all text-sm font-medium text-blue-700 hover:underline"
+              >
+                {{ fileLabel(submission.blobUrl, submission.externalUrl) }}
+              </a>
+              <span class="shrink-0 text-xs text-slate-500">
+                {{ formatSubmittedAt(submission.submittedAt) }}
+              </span>
+            </div>
+            <p
+              v-if="submission.notes"
+              class="mt-1 text-sm text-slate-600 whitespace-pre-wrap"
+            >
+              {{ submission.notes }}
+            </p>
+          </li>
+        </ul>
       </div>
     </template>
   </div>
