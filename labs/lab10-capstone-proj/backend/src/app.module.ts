@@ -13,6 +13,7 @@ import { Challenge } from './challenges/challenge.entity';
 import { Enrollment } from './enrollments/enrollment.entity';
 import { Submission } from './submissions/submission.entity';
 import { SubmissionsModule } from './submissions/submissions.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SubmissionsModule } from './submissions/submissions.module';
     EnrollmentsModule,
     MeModule,
     SubmissionsModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

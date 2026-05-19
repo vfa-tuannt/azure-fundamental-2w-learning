@@ -74,6 +74,8 @@ describe('SubmissionsController (e2e)', () => {
       externalUrl: 'https://github.com/u/r',
       notes: '',
       submittedAt: '2024-01-03T00:00:00.000Z',
+      rejectionReason: null,
+      reviewedAt: null,
     });
     const res = await request(app.getHttpServer())
       .get(`/submissions/${SUBMISSION_ID}`)

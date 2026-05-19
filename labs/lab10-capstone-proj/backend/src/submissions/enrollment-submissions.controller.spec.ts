@@ -34,6 +34,8 @@ function buildSubmissionDto() {
     externalUrl: null,
     notes: '',
     submittedAt: '2024-01-03T00:00:00.000Z',
+    rejectionReason: null,
+    reviewedAt: null,
   };
 }
 

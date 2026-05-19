@@ -69,6 +69,8 @@ function buildSubmission(overrides: Partial<Submission> = {}): Submission {
     externalUrl: null,
     notes: '',
     submittedAt: new Date('2024-01-03T00:00:00Z'),
+    rejectionReason: null,
+    reviewedAt: null,
     ...overrides,
   };
 }

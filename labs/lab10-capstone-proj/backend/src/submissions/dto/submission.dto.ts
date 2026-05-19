@@ -5,4 +5,6 @@ export interface SubmissionDto {
   externalUrl: string | null;
   notes: string;
   submittedAt: string;
+  rejectionReason: string | null;
+  reviewedAt: string | null;
 }

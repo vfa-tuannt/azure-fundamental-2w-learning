@@ -262,7 +262,7 @@ export class SubmissionsService {
     });
   }
 
-  private toDto(entity: Submission): SubmissionDto {
+  toDto(entity: Submission): SubmissionDto {
     return {
       id: entity.id,
       enrollmentId: entity.enrollmentId,
@@ -270,6 +270,8 @@ export class SubmissionsService {
       externalUrl: entity.externalUrl,
       notes: entity.notes,
       submittedAt: entity.submittedAt.toISOString(),
+      rejectionReason: entity.rejectionReason,
+      reviewedAt: entity.reviewedAt ? entity.reviewedAt.toISOString() : null,
     };
   }
 

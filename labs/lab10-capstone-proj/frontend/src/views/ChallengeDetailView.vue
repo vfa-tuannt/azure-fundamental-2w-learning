@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { MdPreview } from 'md-editor-v3'
+import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
 import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
 import InputText from 'primevue/inputtext'
+import Message from 'primevue/message'
 import SelectButton from 'primevue/selectbutton'
 import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
@@ -14,8 +18,13 @@ import { useToast } from 'primevue/usetoast'
 import { deleteChallenge, getChallenge } from '@/api/challenges'
 import { useAuthStore } from '@/stores/auth'
 import { useEnrollmentsStore } from '@/stores/enrollments'
+import { useReviewsStore } from '@/stores/reviews'
 import { useSubmissionsStore } from '@/stores/submissions'
-import type { Challenge } from '@/api/types'
+import type {
+  Challenge,
+  ChallengeSubmission,
+  EnrollmentStatus,
+} from '@/api/types'
 
 type ButtonState =
   | 'owner-hint'
@@ -33,8 +42,27 @@ const router = useRouter()
 const auth = useAuthStore()
 const enrollments = useEnrollmentsStore()
 const submissions = useSubmissionsStore()
+const reviews = useReviewsStore()
 const confirm = useConfirm()
 const toast = useToast()
+
+const expandedRejectRowId = ref<string | null>(null)
+const rejectReasonInputs = reactive<Record<string, string>>({})
+const reviewingId = ref<string | null>(null)
+
+type StatusSeverity = 'info' | 'success' | 'danger' | 'secondary'
+const STATUS_SEVERITY: Record<EnrollmentStatus, StatusSeverity> = {
+  in_progress: 'secondary',
+  submitted: 'info',
+  approved: 'success',
+  rejected: 'danger',
+}
+const STATUS_LABEL: Record<EnrollmentStatus, string> = {
+  in_progress: 'In progress',
+  submitted: 'Submitted',
+  approved: 'Approved',
+  rejected: 'Rejected',
+}
 
 const challenge = ref<Challenge | null>(null)
 const loading = ref(true)
@@ -76,6 +104,20 @@ const mySubmissions = computed(() => {
   if (!id) return []
   return submissions.byEnrollmentId.get(id) ?? []
 })
+
+const challengeSubmissions = computed<ChallengeSubmission[]>(() => {
+  if (!challenge.value) return []
+  return reviews.byChallengeId.get(challenge.value.id) ?? []
+})
+
+function rejectionBannerText(
+  rejectionReason: string | null,
+  reviewedAt: string | null,
+  status: EnrollmentStatus,
+): string | null {
+  if (status !== 'rejected' || reviewedAt === null) return null
+  return rejectionReason ?? 'Submission rejected — no reason provided'
+}
 
 const isFormValid = computed(() => {
   if (submitMode.value === 'file') {
@@ -142,6 +184,9 @@ async function load() {
       if (mine) {
         await submissions.loadForEnrollment(mine.id)
       }
+    }
+    if (isOwner.value) {
+      await reviews.loadForChallenge(id)
     }
   } catch (err) {
     const status = (err as { response?: { status?: number } }).response?.status
@@ -372,6 +417,98 @@ async function onSubmit() {
     submitting.value = false
   }
 }
+
+async function handleReviewError(
+  err: unknown,
+  challengeId: string,
+): Promise<void> {
+  const status = (err as { response?: { status?: number } }).response?.status
+  if (status === 409) {
+    toast.add({
+      severity: 'warn',
+      summary: 'This submission was reviewed in another tab',
+      detail: 'Refreshing the list to reconcile.',
+      life: 4000,
+    })
+    try {
+      await reviews.loadForChallenge(challengeId)
+    } catch {
+      // ignore reload errors; primary error is already surfaced
+    }
+    return
+  }
+  if (status === 403) {
+    toast.add({
+      severity: 'error',
+      summary: 'Action not permitted',
+      detail: extractApiMessage(err),
+      life: 4000,
+    })
+    return
+  }
+  toast.add({
+    severity: 'error',
+    summary: 'Action failed',
+    detail: extractApiMessage(err),
+    life: 4000,
+  })
+}
+
+async function onApprove(row: ChallengeSubmission) {
+  if (!challenge.value) return
+  const challengeId = challenge.value.id
+  reviewingId.value = row.id
+  try {
+    await reviews.approve(challengeId, row.id)
+    toast.add({
+      severity: 'success',
+      summary: 'Submission approved',
+      life: 3000,
+    })
+  } catch (err) {
+    await handleReviewError(err, challengeId)
+  } finally {
+    reviewingId.value = null
+  }
+}
+
+function onRejectExpand(row: ChallengeSubmission) {
+  if (expandedRejectRowId.value === row.id) {
+    expandedRejectRowId.value = null
+    return
+  }
+  expandedRejectRowId.value = row.id
+  if (!(row.id in rejectReasonInputs)) {
+    rejectReasonInputs[row.id] = ''
+  }
+}
+
+function onRejectCancel(row: ChallengeSubmission) {
+  expandedRejectRowId.value = null
+  rejectReasonInputs[row.id] = ''
+}
+
+async function onRejectConfirm(row: ChallengeSubmission) {
+  if (!challenge.value) return
+  const challengeId = challenge.value.id
+  const reasonRaw = rejectReasonInputs[row.id] ?? ''
+  const reason = reasonRaw.trim().length > 0 ? reasonRaw : undefined
+  reviewingId.value = row.id
+  try {
+    await reviews.reject(challengeId, row.id, reason)
+    toast.add({
+      severity: 'success',
+      summary: 'Submission rejected',
+      life: 3000,
+    })
+    expandedRejectRowId.value = null
+    rejectReasonInputs[row.id] = ''
+  } catch (err) {
+    await handleReviewError(err, challengeId)
+  } finally {
+    reviewingId.value = null
+  }
+}
 </script>
 
 <template>
@@ -578,9 +715,181 @@ async function onSubmit() {
             >
               {{ submission.notes }}
             </p>
+            <Message
+              v-if="
+                myEnrollment &&
+                rejectionBannerText(
+                  submission.rejectionReason,
+                  submission.reviewedAt,
+                  myEnrollment.status,
+                ) !== null
+              "
+              severity="error"
+              :closable="false"
+              class="mt-2"
+            >
+              {{
+                rejectionBannerText(
+                  submission.rejectionReason,
+                  submission.reviewedAt,
+                  myEnrollment.status,
+                )
+              }}
+            </Message>
           </li>
         </ul>
       </div>
+
+      <section
+        v-if="isOwner"
+        class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+      >
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-slate-900">
+            Submissions ({{ challengeSubmissions.length }})
+          </h2>
+        </div>
+
+        <div
+          v-if="challengeSubmissions.length === 0"
+          class="mt-4 rounded-md border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500"
+        >
+          No submissions yet.
+        </div>
+
+        <DataTable
+          v-else
+          :value="challengeSubmissions"
+          data-key="id"
+          class="mt-4"
+          striped-rows
+        >
+          <Column header="Submitter">
+            <template #body="{ data }">
+              <div class="flex items-center gap-2">
+                <Avatar
+                  :image="data.submitter.avatarUrl ?? undefined"
+                  :label="
+                    data.submitter.avatarUrl
+                      ? undefined
+                      : data.submitter.name.charAt(0).toUpperCase()
+                  "
+                  shape="circle"
+                  size="normal"
+                />
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-slate-900">
+                    {{ data.submitter.name }}
+                  </span>
+                  <span class="text-xs text-slate-500">
+                    {{ data.submitter.email }}
+                  </span>
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column header="Submission">
+            <template #body="{ data }">
+              <a
+                :href="data.blobUrl ?? data.externalUrl ?? '#'"
+                target="_blank"
+                rel="noopener"
+                class="break-all text-sm font-medium text-blue-700 hover:underline"
+              >
+                {{ fileLabel(data.blobUrl, data.externalUrl) }}
+              </a>
+            </template>
+          </Column>
+          <Column header="Notes">
+            <template #body="{ data }">
+              <span
+                v-if="data.notes"
+                class="text-sm text-slate-600 whitespace-pre-wrap"
+              >
+                {{ data.notes }}
+              </span>
+              <span v-else class="text-xs text-slate-400">—</span>
+            </template>
+          </Column>
+          <Column header="Submitted">
+            <template #body="{ data }">
+              <span class="text-xs text-slate-500">
+                {{ formatSubmittedAt(data.submittedAt) }}
+              </span>
+            </template>
+          </Column>
+          <Column header="Status">
+            <template #body="{ data }">
+              <Tag
+                :value="STATUS_LABEL[data.enrollment.status as EnrollmentStatus]"
+                :severity="STATUS_SEVERITY[data.enrollment.status as EnrollmentStatus]"
+              />
+            </template>
+          </Column>
+          <Column header="Actions">
+            <template #body="{ data }">
+              <div
+                v-if="data.enrollment.status === 'submitted'"
+                class="flex flex-col gap-2"
+              >
+                <div class="flex gap-2">
+                  <Button
+                    label="Approve"
+                    icon="pi pi-check"
+                    severity="success"
+                    size="small"
+                    :loading="reviewingId === data.id"
+                    @click="onApprove(data)"
+                  />
+                  <Button
+                    :label="
+                      expandedRejectRowId === data.id ? 'Close' : 'Reject'
+                    "
+                    icon="pi pi-times"
+                    severity="danger"
+                    size="small"
+                    outlined
+                    :disabled="reviewingId === data.id"
+                    @click="onRejectExpand(data)"
+                  />
+                </div>
+                <div
+                  v-if="expandedRejectRowId === data.id"
+                  class="flex flex-col gap-2 rounded-md border border-slate-200 bg-slate-50 p-3"
+                >
+                  <label class="text-xs font-medium text-slate-700">
+                    Reason (optional)
+                  </label>
+                  <Textarea
+                    v-model="rejectReasonInputs[data.id]"
+                    rows="3"
+                    placeholder="Explain why this submission is rejected"
+                    auto-resize
+                  />
+                  <div class="flex justify-end gap-2">
+                    <Button
+                      label="Cancel"
+                      severity="secondary"
+                      size="small"
+                      outlined
+                      @click="onRejectCancel(data)"
+                    />
+                    <Button
+                      label="Reject"
+                      icon="pi pi-times"
+                      severity="danger"
+                      size="small"
+                      :loading="reviewingId === data.id"
+                      @click="onRejectConfirm(data)"
+                    />
+                  </div>
+                </div>
+              </div>
+              <span v-else class="text-xs text-slate-400">Reviewed</span>
+            </template>
+          </Column>
+        </DataTable>
+      </section>
     </template>
   </div>
 </template>

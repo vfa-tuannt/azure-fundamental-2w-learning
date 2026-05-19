@@ -63,7 +63,7 @@ export class AzureBlobStorageService {
     );
     await client.createIfNotExists({ access: 'blob' as PublicAccessType });
     // Ensure public blob access even if the container already existed without it
-    await client.setAccessPolicy('blob' as PublicAccessType);
+    await client.setAccessPolicy('blob');
     this.containerClient = client;
     this.containerReady = true;
     return client;

@@ -33,4 +33,10 @@ export class Submission {
 
   @CreateDateColumn({ name: 'submitted_at', type: 'timestamptz' })
   submittedAt!: Date;
+
+  @Column({ name: 'rejection_reason', type: 'text', nullable: true })
+  rejectionReason!: string | null;
+
+  @Column({ name: 'reviewed_at', type: 'timestamptz', nullable: true })
+  reviewedAt!: Date | null;
 }

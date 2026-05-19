@@ -8,6 +8,7 @@ interface MockBlockBlobClient {
 
 interface MockContainerClient {
   createIfNotExists: jest.Mock;
+  setAccessPolicy: jest.Mock;
   getBlockBlobClient: jest.Mock<MockBlockBlobClient, [string]>;
   deleteBlob: jest.Mock;
 }
@@ -16,6 +17,7 @@ const blockBlobInstances: MockBlockBlobClient[] = [];
 
 const containerClient: MockContainerClient = {
   createIfNotExists: jest.fn().mockResolvedValue({ succeeded: true }),
+  setAccessPolicy: jest.fn().mockResolvedValue(undefined),
   getBlockBlobClient: jest.fn((key: string) => {
     const inst: MockBlockBlobClient = {
       url: `https://127.0.0.1/devstoreaccount1/submissions/${key}`,
@@ -53,6 +55,7 @@ function makeService(): AzureBlobStorageService {
 describe('AzureBlobStorageService', () => {
   beforeEach(() => {
     containerClient.createIfNotExists.mockClear();
+    containerClient.setAccessPolicy.mockClear();
     containerClient.getBlockBlobClient.mockClear();
     containerClient.deleteBlob.mockClear();
     blockBlobInstances.length = 0;

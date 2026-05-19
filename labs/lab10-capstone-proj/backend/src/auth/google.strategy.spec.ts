@@ -28,6 +28,7 @@ describe('GoogleStrategy', () => {
           throw new Error(`unexpected key ${key}`);
       }
     },
+    get: (_key: string) => undefined,
   } as unknown as ConfigService;
 
   it('rejects non-@vitalify.asia email with ForbiddenException', async () => {

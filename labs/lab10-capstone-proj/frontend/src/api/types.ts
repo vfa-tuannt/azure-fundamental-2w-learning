@@ -84,4 +84,24 @@ export interface Submission {
   externalUrl: string | null
   notes: string
   submittedAt: string
+  rejectionReason: string | null
+  reviewedAt: string | null
+}
+
+export interface ChallengeSubmissionEnrollment {
+  id: string
+  userId: string
+  status: EnrollmentStatus
+}
+
+export interface ChallengeSubmissionSubmitter {
+  id: string
+  name: string
+  email: string
+  avatarUrl: string | null
+}
+
+export interface ChallengeSubmission extends Submission {
+  enrollment: ChallengeSubmissionEnrollment
+  submitter: ChallengeSubmissionSubmitter
 }
