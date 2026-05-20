@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
@@ -7,13 +7,19 @@ import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Skeleton from 'primevue/skeleton'
 import Tag from 'primevue/tag'
+import ActivityTimeline from '@/components/ActivityTimeline.vue'
+import StatsTiles from '@/components/StatsTiles.vue'
+import { getMyStats } from '@/api/me'
+import { useActivityStore } from '@/stores/activity'
 import { useAuthStore } from '@/stores/auth'
 import { useEnrollmentsStore } from '@/stores/enrollments'
-import type { EnrollmentStatus, MyEnrollment } from '@/api/types'
+import type { EnrollmentStatus, MyEnrollment, MyStats } from '@/api/types'
 
 const router = useRouter()
 const auth = useAuthStore()
 const enrollments = useEnrollmentsStore()
+const activity = useActivityStore()
+const stats = ref<MyStats | null>(null)
 
 const initials = computed(() => {
   if (!auth.user) return '?'
@@ -29,6 +35,14 @@ onMounted(() => {
   if (!enrollments.myListLoaded) {
     void enrollments.loadMyList()
   }
+  getMyStats()
+    .then((s) => {
+      stats.value = s
+    })
+    .catch(() => {
+      // Stats failure is non-fatal — leave skeleton state
+    })
+  void activity.loadMine()
 })
 
 function statusSeverity(
@@ -74,6 +88,8 @@ function onRowClick(event: { data: MyEnrollment }) {
         </div>
       </div>
     </div>
+
+    <StatsTiles :stats="stats" />
 
     <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <h2 class="text-lg font-semibold text-slate-900">My Challenges</h2>
@@ -136,6 +152,12 @@ function onRowClick(event: { data: MyEnrollment }) {
           </template>
         </Column>
       </DataTable>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-semibold text-slate-900">Recent Activity</h2>
+      <p class="mt-1 text-sm text-slate-600">Your latest actions on the platform.</p>
+      <ActivityTimeline :events="activity.mine" class="mt-4" />
     </div>
   </div>
 </template>

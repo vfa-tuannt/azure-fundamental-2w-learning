@@ -14,6 +14,8 @@ import { Enrollment } from './enrollments/enrollment.entity';
 import { Submission } from './submissions/submission.entity';
 import { SubmissionsModule } from './submissions/submissions.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { ActivityModule } from './activity/activity.module';
+import { ActivityEvent } from './activity/activity-event.entity';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { ReviewsModule } from './reviews/reviews.module';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.getOrThrow<string>('DATABASE_URL'),
-        entities: [User, Challenge, Enrollment, Submission],
+        entities: [User, Challenge, Enrollment, Submission, ActivityEvent],
         synchronize: false,
       }),
     }),
@@ -34,6 +36,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     MeModule,
     SubmissionsModule,
     ReviewsModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

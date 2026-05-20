@@ -7,6 +7,7 @@ import { EnrollmentStatus } from '../enrollments/enrollment-status.enum';
 import { EnrollmentsService } from '../enrollments/enrollments.service';
 import { User } from '../users/user.entity';
 import { MeController } from './me.controller';
+import { MeService } from './me.service';
 
 const USER_ID = '11111111-1111-1111-1111-111111111111';
 const CHALLENGE_ID = '22222222-2222-2222-2222-222222222222';
@@ -26,11 +27,17 @@ describe('MeController (e2e)', () => {
   const service = {
     listMine: jest.fn(),
   };
+  const meService = {
+    getStats: jest.fn(),
+  };
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [MeController],
-      providers: [{ provide: EnrollmentsService, useValue: service }],
+      providers: [
+        { provide: EnrollmentsService, useValue: service },
+        { provide: MeService, useValue: meService },
+      ],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({
@@ -93,5 +100,26 @@ describe('MeController (e2e)', () => {
     expect(res.body).toHaveLength(1);
     expect(res.body[0].challenge.title).toBe('Learn ARM');
     expect(service.listMine).toHaveBeenCalledWith(USER_ID);
+  });
+
+  it('GET /me/stats returns 401/403 without JWT', async () => {
+    const res = await request(app.getHttpServer()).get('/me/stats');
+    expect([401, 403]).toContain(res.status);
+  });
+
+  it('GET /me/stats returns three integer counts with valid JWT', async () => {
+    allowAuth = true;
+    meService.getStats.mockResolvedValue({
+      challengesCreated: 3,
+      enrollmentsActive: 1,
+      enrollmentsApproved: 2,
+    });
+    const res = await request(app.getHttpServer()).get('/me/stats').expect(200);
+    expect(res.body).toEqual({
+      challengesCreated: 3,
+      enrollmentsActive: 1,
+      enrollmentsApproved: 2,
+    });
+    expect(meService.getStats).toHaveBeenCalledWith(USER_ID);
   });
 });

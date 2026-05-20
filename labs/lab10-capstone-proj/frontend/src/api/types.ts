@@ -105,3 +105,83 @@ export interface ChallengeSubmission extends Submission {
   enrollment: ChallengeSubmissionEnrollment
   submitter: ChallengeSubmissionSubmitter
 }
+
+export type ActivityEventType =
+  | 'challenge_created'
+  | 'enrolled'
+  | 'submitted'
+  | 'approved'
+  | 'rejected'
+
+export interface ChallengeCreatedPayload {
+  challengeId: string
+  challengeTitle: string
+}
+
+export interface EnrolledPayload {
+  challengeId: string
+  challengeTitle: string
+  enrollmentId: string
+}
+
+export interface SubmittedPayload {
+  submissionId: string
+  enrollmentId: string
+  challengeId: string
+  challengeTitle: string
+  kind: 'file' | 'url'
+}
+
+export interface ApprovedPayload {
+  submissionId: string
+  enrollmentId: string
+  challengeId: string
+  challengeTitle: string
+  reviewerId: string
+}
+
+export interface RejectedPayload {
+  submissionId: string
+  enrollmentId: string
+  challengeId: string
+  challengeTitle: string
+  reviewerId: string
+  rejectionReason: string | null
+}
+
+export type ActivityPayload =
+  | ChallengeCreatedPayload
+  | EnrolledPayload
+  | SubmittedPayload
+  | ApprovedPayload
+  | RejectedPayload
+
+export interface ActivityActor {
+  id: string
+  name: string
+  avatarUrl: string | null
+}
+
+export interface ActivityEventBase<
+  T extends ActivityEventType,
+  P extends ActivityPayload,
+> {
+  id: string
+  type: T
+  payload: P
+  createdAt: string
+  user: ActivityActor
+}
+
+export type ActivityEvent =
+  | ActivityEventBase<'challenge_created', ChallengeCreatedPayload>
+  | ActivityEventBase<'enrolled', EnrolledPayload>
+  | ActivityEventBase<'submitted', SubmittedPayload>
+  | ActivityEventBase<'approved', ApprovedPayload>
+  | ActivityEventBase<'rejected', RejectedPayload>
+
+export interface MyStats {
+  challengesCreated: number
+  enrollmentsActive: number
+  enrollmentsApproved: number
+}

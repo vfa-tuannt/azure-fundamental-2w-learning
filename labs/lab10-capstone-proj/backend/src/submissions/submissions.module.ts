@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ActivityModule } from '../activity/activity.module';
 import { AuthModule } from '../auth/auth.module';
 import { Challenge } from '../challenges/challenge.entity';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -13,6 +14,7 @@ import { SubmissionsService } from './submissions.service';
   imports: [
     TypeOrmModule.forFeature([Submission, Enrollment, Challenge]),
     AuthModule,
+    ActivityModule,
   ],
   controllers: [EnrollmentSubmissionsController, SubmissionsController],
   providers: [SubmissionsService, AzureBlobStorageService],

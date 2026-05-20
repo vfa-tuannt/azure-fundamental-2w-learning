@@ -7,6 +7,8 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge, ChallengeStatus } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from '../enrollments/enrollment-status.enum';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -159,9 +161,11 @@ describe('SubmissionsService', () => {
   let submissionsRepo: jest.Mocked<Repository<Submission>>;
   let blobStorage: jest.Mocked<AzureBlobStorageService>;
   let tx: TxRepos;
+  let activityRecord: jest.Mock;
 
   beforeEach(async () => {
     tx = buildTxRepos();
+    activityRecord = jest.fn().mockResolvedValue(undefined);
     const enrollmentsRepoMock: Partial<jest.Mocked<Repository<Enrollment>>> = {
       findOne: jest.fn(),
     };
@@ -199,6 +203,7 @@ describe('SubmissionsService', () => {
         },
         { provide: getDataSourceToken(), useValue: buildDataSource(tx) },
         { provide: AzureBlobStorageService, useValue: blobStorageMock },
+        { provide: ActivityService, useValue: { record: activityRecord } },
       ],
     }).compile();
 
@@ -305,6 +310,14 @@ describe('SubmissionsService', () => {
       expect(result.blobUrl).toContain('USER/ENROLL/uuid-report.pdf');
       expect(result.externalUrl).toBeNull();
       expect(result.notes).toBe('note');
+      expect(activityRecord).toHaveBeenCalledTimes(1);
+      expect(activityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: USER_ID,
+          type: ActivityEventType.SUBMITTED,
+          payload: expect.objectContaining({ kind: 'file' }),
+        }),
+      );
     });
 
     it('throws NotFoundException when enrollment is missing', async () => {
@@ -410,6 +423,14 @@ describe('SubmissionsService', () => {
       expect(result.blobUrl).toBeNull();
       expect(result.externalUrl).toBe('https://github.com/u/r');
       expect(result.notes).toBe('see readme');
+      expect(activityRecord).toHaveBeenCalledTimes(1);
+      expect(activityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: USER_ID,
+          type: ActivityEventType.SUBMITTED,
+          payload: expect.objectContaining({ kind: 'url' }),
+        }),
+      );
     });
 
     it('403 for non-owner', async () => {

@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge, ChallengeStatus } from './challenge.entity';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
@@ -20,6 +22,7 @@ export class ChallengesService {
   constructor(
     @InjectRepository(Challenge)
     private readonly challenges: Repository<Challenge>,
+    private readonly activity: ActivityService,
   ) {}
 
   async create(
@@ -36,6 +39,11 @@ export class ChallengesService {
       status: ChallengeStatus.OPEN,
     });
     const saved = await this.challenges.save(entity);
+    await this.activity.record({
+      userId: ownerId,
+      type: ActivityEventType.CHALLENGE_CREATED,
+      payload: { challengeId: saved.id, challengeTitle: saved.title },
+    });
     return this.toDto(saved, 0);
   }
 

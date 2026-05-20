@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ActivityModule } from '../activity/activity.module';
 import { AuthModule } from '../auth/auth.module';
 import { Challenge } from '../challenges/challenge.entity';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -14,6 +15,7 @@ import { ReviewsService } from './reviews.service';
     TypeOrmModule.forFeature([Submission, Enrollment, Challenge, User]),
     AuthModule,
     SubmissionsModule,
+    ActivityModule,
   ],
   controllers: [ReviewsController],
   providers: [ReviewsService],

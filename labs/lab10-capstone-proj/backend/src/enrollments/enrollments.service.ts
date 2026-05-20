@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge, ChallengeStatus } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from './enrollment-status.enum';
 import { Enrollment } from './enrollment.entity';
@@ -23,75 +25,90 @@ export class EnrollmentsService {
     private readonly challenges: Repository<Challenge>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
+    private readonly activity: ActivityService,
   ) {}
 
   async enroll(challengeId: string, userId: string): Promise<EnrollmentDto> {
-    return this.dataSource.transaction('SERIALIZABLE', async (manager) => {
-      const challenges = manager.getRepository(Challenge);
-      const enrollments = manager.getRepository(Enrollment);
+    const { dto, challengeTitle } = await this.dataSource.transaction(
+      'SERIALIZABLE',
+      async (manager) => {
+        const challenges = manager.getRepository(Challenge);
+        const enrollments = manager.getRepository(Enrollment);
 
-      const challenge = await challenges.findOne({
-        where: { id: challengeId },
-      });
-      if (!challenge) {
-        throw new NotFoundException();
-      }
-      if (challenge.status === ChallengeStatus.CLOSED) {
-        throw new BadRequestException(
-          'This challenge is no longer accepting enrollments',
-        );
-      }
-      if (challenge.ownerId === userId) {
-        throw new BadRequestException(
-          'You cannot enroll in your own challenge',
-        );
-      }
-
-      const existing = await enrollments.findOne({
-        where: { challengeId, userId },
-      });
-      if (existing) {
-        throw new ConflictException(
-          'You are already enrolled in this challenge',
-        );
-      }
-
-      if (challenge.maxEnrollments !== null) {
-        const activeCount = await enrollments
-          .createQueryBuilder('e')
-          .where('e.challenge_id = :challengeId', { challengeId })
-          .andWhere('e.status != :rejected', {
-            rejected: EnrollmentStatus.REJECTED,
-          })
-          .getCount();
-        if (activeCount >= challenge.maxEnrollments) {
-          throw new ConflictException(
-            'This challenge has reached its enrollment cap',
+        const challenge = await challenges.findOne({
+          where: { id: challengeId },
+        });
+        if (!challenge) {
+          throw new NotFoundException();
+        }
+        if (challenge.status === ChallengeStatus.CLOSED) {
+          throw new BadRequestException(
+            'This challenge is no longer accepting enrollments',
           );
         }
-      }
+        if (challenge.ownerId === userId) {
+          throw new BadRequestException(
+            'You cannot enroll in your own challenge',
+          );
+        }
 
-      const entity = enrollments.create({
-        challengeId,
-        userId,
-        status: EnrollmentStatus.IN_PROGRESS,
-      });
-
-      try {
-        const saved = await enrollments.save(entity);
-        return this.toDto(saved);
-      } catch (err) {
-        if (
-          err instanceof QueryFailedError &&
-          (err.driverError as { code?: string })?.code === UNIQUE_VIOLATION
-        ) {
+        const existing = await enrollments.findOne({
+          where: { challengeId, userId },
+        });
+        if (existing) {
           throw new ConflictException(
             'You are already enrolled in this challenge',
           );
         }
-        throw err;
-      }
+
+        if (challenge.maxEnrollments !== null) {
+          const activeCount = await enrollments
+            .createQueryBuilder('e')
+            .where('e.challenge_id = :challengeId', { challengeId })
+            .andWhere('e.status != :rejected', {
+              rejected: EnrollmentStatus.REJECTED,
+            })
+            .getCount();
+          if (activeCount >= challenge.maxEnrollments) {
+            throw new ConflictException(
+              'This challenge has reached its enrollment cap',
+            );
+          }
+        }
+
+        const entity = enrollments.create({
+          challengeId,
+          userId,
+          status: EnrollmentStatus.IN_PROGRESS,
+        });
+
+        try {
+          const saved = await enrollments.save(entity);
+          return { dto: this.toDto(saved), challengeTitle: challenge.title };
+        } catch (err) {
+          if (
+            err instanceof QueryFailedError &&
+            (err.driverError as { code?: string })?.code === UNIQUE_VIOLATION
+          ) {
+            throw new ConflictException(
+              'You are already enrolled in this challenge',
+            );
+          }
+          throw err;
+        }
+      },
+    );
+
+    await this.activity.record({
+      userId,
+      type: ActivityEventType.ENROLLED,
+      payload: {
+        challengeId,
+        challengeTitle,
+        enrollmentId: dto.id,
+      },
     });
+    return dto;
   }
 
   async withdraw(challengeId: string, userId: string): Promise<void> {

@@ -2,6 +2,8 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge, ChallengeStatus } from './challenge.entity';
 import { ChallengesService } from './challenges.service';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
@@ -83,9 +85,11 @@ describe('ChallengesService', () => {
   let service: ChallengesService;
   let repo: jest.Mocked<Repository<Challenge>>;
   let managerCreateQb: jest.Mock;
+  let activityRecord: jest.Mock;
 
   beforeEach(async () => {
     managerCreateQb = jest.fn().mockReturnValue(buildCountQb(0));
+    activityRecord = jest.fn().mockResolvedValue(undefined);
     const repoMock: Partial<jest.Mocked<Repository<Challenge>>> = {
       create: jest.fn(),
       save: jest.fn(),
@@ -100,6 +104,7 @@ describe('ChallengesService', () => {
       providers: [
         ChallengesService,
         { provide: getRepositoryToken(Challenge), useValue: repoMock },
+        { provide: ActivityService, useValue: { record: activityRecord } },
       ],
     }).compile();
 
@@ -140,6 +145,25 @@ describe('ChallengesService', () => {
       expect(result.enrollmentsCount).toBe(0);
       expect(result.ownerId).toBe(OWNER_ID);
       expect(result.status).toBe(ChallengeStatus.OPEN);
+      expect(activityRecord).toHaveBeenCalledTimes(1);
+      expect(activityRecord).toHaveBeenCalledWith({
+        userId: OWNER_ID,
+        type: ActivityEventType.CHALLENGE_CREATED,
+        payload: { challengeId: CHALLENGE_ID, challengeTitle: dto.title },
+      });
+    });
+
+    it('does not record an activity event when save fails', async () => {
+      const dto: CreateChallengeDto = {
+        title: 'X',
+        description: 'D',
+        requiredSkills: [],
+        deadline: new Date('2099-01-01T00:00:00Z'),
+      };
+      repo.create.mockReturnValue(buildEntity());
+      repo.save.mockRejectedValue(new Error('boom'));
+      await expect(service.create(OWNER_ID, dto)).rejects.toThrow('boom');
+      expect(activityRecord).not.toHaveBeenCalled();
     });
   });
 

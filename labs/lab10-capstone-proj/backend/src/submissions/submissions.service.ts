@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from '../enrollments/enrollment-status.enum';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -58,6 +60,7 @@ export class SubmissionsService {
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly blobStorage: AzureBlobStorageService,
+    private readonly activity: ActivityService,
   ) {}
 
   validateFile(file: Express.Multer.File): void {
@@ -94,7 +97,8 @@ export class SubmissionsService {
   ): Promise<SubmissionDto> {
     this.validateFile(file);
 
-    const { enrollment } = await this.loadEnrollmentWithChallenge(enrollmentId);
+    const { enrollment, challenge } =
+      await this.loadEnrollmentWithChallenge(enrollmentId);
     if (enrollment.userId !== userId) {
       throw new ForbiddenException();
     }
@@ -115,8 +119,9 @@ export class SubmissionsService {
       objectKey,
     );
 
+    let saved: SubmissionDto;
     try {
-      return await this.insertSubmissionAndFlipStatus(enrollmentId, {
+      saved = await this.insertSubmissionAndFlipStatus(enrollmentId, {
         blobUrl,
         externalUrl: null,
         notes: notes ?? '',
@@ -127,6 +132,19 @@ export class SubmissionsService {
       );
       throw err;
     }
+
+    await this.activity.record({
+      userId,
+      type: ActivityEventType.SUBMITTED,
+      payload: {
+        submissionId: saved.id,
+        enrollmentId,
+        challengeId: challenge.id,
+        challengeTitle: challenge.title,
+        kind: 'file',
+      },
+    });
+    return saved;
   }
 
   async createFromUrl(
@@ -139,7 +157,8 @@ export class SubmissionsService {
       throw new BadRequestException('externalUrl is required');
     }
 
-    const { enrollment } = await this.loadEnrollmentWithChallenge(enrollmentId);
+    const { enrollment, challenge } =
+      await this.loadEnrollmentWithChallenge(enrollmentId);
     if (enrollment.userId !== userId) {
       throw new ForbiddenException();
     }
@@ -149,11 +168,23 @@ export class SubmissionsService {
       );
     }
 
-    return this.insertSubmissionAndFlipStatus(enrollmentId, {
+    const saved = await this.insertSubmissionAndFlipStatus(enrollmentId, {
       blobUrl: null,
       externalUrl,
       notes: notes ?? '',
     });
+    await this.activity.record({
+      userId,
+      type: ActivityEventType.SUBMITTED,
+      payload: {
+        submissionId: saved.id,
+        enrollmentId,
+        challengeId: challenge.id,
+        challengeTitle: challenge.title,
+        kind: 'url',
+      },
+    });
+    return saved;
   }
 
   async listForEnrollment(

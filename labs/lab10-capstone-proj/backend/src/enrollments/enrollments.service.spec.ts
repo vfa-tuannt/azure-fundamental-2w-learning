@@ -6,6 +6,8 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge, ChallengeStatus } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from './enrollment-status.enum';
 import { Enrollment } from './enrollment.entity';
@@ -109,9 +111,11 @@ describe('EnrollmentsService', () => {
   let service: EnrollmentsService;
   let enrollmentsRepo: jest.Mocked<Repository<Enrollment>>;
   let tx: TxRepos;
+  let activityRecord: jest.Mock;
 
   beforeEach(async () => {
     tx = buildTxRepos();
+    activityRecord = jest.fn().mockResolvedValue(undefined);
     const enrollmentsRepoMock: Partial<jest.Mocked<Repository<Enrollment>>> = {
       findOne: jest.fn(),
       remove: jest.fn(),
@@ -132,6 +136,7 @@ describe('EnrollmentsService', () => {
           useValue: challengesRepoMock,
         },
         { provide: getDataSourceToken(), useValue: buildDataSource(tx) },
+        { provide: ActivityService, useValue: { record: activityRecord } },
       ],
     }).compile();
 
@@ -152,6 +157,16 @@ describe('EnrollmentsService', () => {
       expect(result.status).toBe(EnrollmentStatus.IN_PROGRESS);
       expect(result.challengeId).toBe(CHALLENGE_ID);
       expect(result.userId).toBe(USER_ID);
+      expect(activityRecord).toHaveBeenCalledTimes(1);
+      expect(activityRecord).toHaveBeenCalledWith({
+        userId: USER_ID,
+        type: ActivityEventType.ENROLLED,
+        payload: {
+          challengeId: CHALLENGE_ID,
+          challengeTitle: 'Test',
+          enrollmentId: ENROLLMENT_ID,
+        },
+      });
     });
 
     it('throws NotFoundException when challenge is missing', async () => {
@@ -159,6 +174,7 @@ describe('EnrollmentsService', () => {
       await expect(
         service.enroll(CHALLENGE_ID, USER_ID),
       ).rejects.toBeInstanceOf(NotFoundException);
+      expect(activityRecord).not.toHaveBeenCalled();
     });
 
     it('throws BadRequestException when challenge is closed', async () => {
@@ -183,6 +199,7 @@ describe('EnrollmentsService', () => {
       await expect(
         service.enroll(CHALLENGE_ID, USER_ID),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(activityRecord).not.toHaveBeenCalled();
     });
 
     it('throws ConflictException when maxEnrollments cap is reached', async () => {
@@ -229,11 +246,12 @@ describe('EnrollmentsService', () => {
   });
 
   describe('withdraw', () => {
-    it('hard-deletes when status is in_progress', async () => {
+    it('hard-deletes when status is in_progress and does not record activity', async () => {
       const entity = buildEnrollment();
       enrollmentsRepo.findOne.mockResolvedValue(entity);
       await service.withdraw(CHALLENGE_ID, USER_ID);
       expect(enrollmentsRepo.remove).toHaveBeenCalledWith(entity);
+      expect(activityRecord).not.toHaveBeenCalled();
     });
 
     it('throws ConflictException when status is submitted', async () => {

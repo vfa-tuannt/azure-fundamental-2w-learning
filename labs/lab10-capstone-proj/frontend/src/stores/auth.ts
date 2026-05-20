@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import api from '@/api/axios'
 import type { User } from '@/api/types'
+import { useActivityStore } from '@/stores/activity'
 import { useEnrollmentsStore } from '@/stores/enrollments'
 import { useReviewsStore } from '@/stores/reviews'
 import { useSubmissionsStore } from '@/stores/submissions'
@@ -40,6 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
     useEnrollmentsStore().reset()
     useSubmissionsStore().reset()
     useReviewsStore().reset()
+    useActivityStore().reset()
     if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
       window.location.href = '/login'
     }

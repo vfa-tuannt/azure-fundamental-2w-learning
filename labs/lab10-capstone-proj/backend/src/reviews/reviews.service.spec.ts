@@ -6,6 +6,8 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge, ChallengeStatus } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from '../enrollments/enrollment-status.enum';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -125,9 +127,11 @@ describe('ReviewsService', () => {
   let enrollmentsRepo: jest.Mocked<Repository<Enrollment>>;
   let challengesRepo: jest.Mocked<Repository<Challenge>>;
   let tx: TxRepos;
+  let activityRecord: jest.Mock;
 
   beforeEach(async () => {
     tx = buildTxRepos();
+    activityRecord = jest.fn().mockResolvedValue(undefined);
     const submissionsRepoMock: Partial<jest.Mocked<Repository<Submission>>> = {
       findOne: jest.fn(),
       createQueryBuilder: jest.fn(),
@@ -173,6 +177,7 @@ describe('ReviewsService', () => {
         { provide: getRepositoryToken(User), useValue: usersRepoMock },
         { provide: getDataSourceToken(), useValue: buildDataSource(tx) },
         { provide: SubmissionsService, useValue: submissionsServiceMock },
+        { provide: ActivityService, useValue: { record: activityRecord } },
       ],
     }).compile();
 
@@ -214,6 +219,18 @@ describe('ReviewsService', () => {
       expect(savedSubmission.rejectionReason).toBeNull();
       expect(result.reviewedAt).not.toBeNull();
       expect(result.rejectionReason).toBeNull();
+      expect(activityRecord).toHaveBeenCalledTimes(1);
+      expect(activityRecord).toHaveBeenCalledWith({
+        userId: ENROLLEE_ID,
+        type: ActivityEventType.APPROVED,
+        payload: {
+          submissionId: SUBMISSION_ID,
+          enrollmentId: ENROLLMENT_ID,
+          challengeId: CHALLENGE_ID,
+          challengeTitle: 'T',
+          reviewerId: OWNER_ID,
+        },
+      });
     });
 
     it('throws ForbiddenException when caller is not the challenge owner', async () => {
@@ -318,6 +335,15 @@ describe('ReviewsService', () => {
       expect(savedSubmission.reviewedAt).toBeInstanceOf(Date);
       expect(result.rejectionReason).toBe('Output is missing tests');
       expect(result.reviewedAt).not.toBeNull();
+      expect(activityRecord).toHaveBeenCalledTimes(1);
+      expect(activityRecord).toHaveBeenCalledWith({
+        userId: ENROLLEE_ID,
+        type: ActivityEventType.REJECTED,
+        payload: expect.objectContaining({
+          reviewerId: OWNER_ID,
+          rejectionReason: 'Output is missing tests',
+        }),
+      });
     });
 
     it('stores NULL when reason is undefined', async () => {
@@ -331,6 +357,12 @@ describe('ReviewsService', () => {
       const saved = tx.submissions.save.mock.calls[0][0] as Submission;
       expect(saved.rejectionReason).toBeNull();
       expect(result.rejectionReason).toBeNull();
+      expect(activityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ActivityEventType.REJECTED,
+          payload: expect.objectContaining({ rejectionReason: null }),
+        }),
+      );
     });
 
     it('stores NULL when reason is empty string', async () => {

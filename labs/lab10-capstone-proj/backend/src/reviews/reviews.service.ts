@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, Repository } from 'typeorm';
+import { ActivityEventType } from '../activity/activity-event-type.enum';
+import { ActivityService } from '../activity/activity.service';
 import { Challenge } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from '../enrollments/enrollment-status.enum';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -33,6 +35,7 @@ export class ReviewsService {
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly submissionsService: SubmissionsService,
+    private readonly activity: ActivityService,
   ) {}
 
   async approve(
@@ -157,7 +160,7 @@ export class ReviewsService {
       throw new ForbiddenException();
     }
 
-    return this.dataSource.transaction(async (manager) => {
+    const result = await this.dataSource.transaction(async (manager) => {
       const enrollments = manager.getRepository(Enrollment);
       const submissions = manager.getRepository(Submission);
 
@@ -191,5 +194,33 @@ export class ReviewsService {
 
       return this.submissionsService.toDto(saved);
     });
+
+    if (decision.nextStatus === EnrollmentStatus.APPROVED) {
+      await this.activity.record({
+        userId: enrollment.userId,
+        type: ActivityEventType.APPROVED,
+        payload: {
+          submissionId: result.id,
+          enrollmentId: enrollment.id,
+          challengeId: challenge.id,
+          challengeTitle: challenge.title,
+          reviewerId: callerUserId,
+        },
+      });
+    } else {
+      await this.activity.record({
+        userId: enrollment.userId,
+        type: ActivityEventType.REJECTED,
+        payload: {
+          submissionId: result.id,
+          enrollmentId: enrollment.id,
+          challengeId: challenge.id,
+          challengeTitle: challenge.title,
+          reviewerId: callerUserId,
+          rejectionReason: result.rejectionReason,
+        },
+      });
+    }
+    return result;
   }
 }

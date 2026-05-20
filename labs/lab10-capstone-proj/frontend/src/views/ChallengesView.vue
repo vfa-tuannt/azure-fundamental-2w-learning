@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import DataTable, { type DataTablePageEvent, type DataTableRowClickEvent } from 'primevue/datatable'
@@ -8,6 +8,8 @@ import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
 import Message from 'primevue/message'
+import ActivityTimeline from '@/components/ActivityTimeline.vue'
+import { useActivityStore } from '@/stores/activity'
 import { useChallengesStore } from '@/stores/challenges'
 import { useAuthStore } from '@/stores/auth'
 import type { Challenge, ChallengeStatus } from '@/api/types'
@@ -15,6 +17,7 @@ import type { Challenge, ChallengeStatus } from '@/api/types'
 const router = useRouter()
 const store = useChallengesStore()
 const auth = useAuthStore()
+const activity = useActivityStore()
 
 const skillInput = ref('')
 const statusInput = ref<ChallengeStatus | null>(null)
@@ -29,6 +32,11 @@ onMounted(() => {
   skillInput.value = store.filters.skill
   statusInput.value = store.filters.status
   void store.fetchList()
+  activity.startGlobalPolling()
+})
+
+onUnmounted(() => {
+  activity.stopGlobalPolling()
 })
 
 let skillTimer: ReturnType<typeof setTimeout> | undefined
@@ -98,6 +106,14 @@ function formatDeadline(value: string): string {
         placeholder="Status"
         class="sm:w-44"
       />
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-semibold text-slate-900">Org-wide Activity</h2>
+      <p class="mt-1 text-sm text-slate-600">
+        What's happening across the platform, refreshed every 30 seconds.
+      </p>
+      <ActivityTimeline :events="activity.recent" class="mt-4" />
     </div>
 
     <Message v-if="store.error" severity="error" :closable="false">{{ store.error }}</Message>
