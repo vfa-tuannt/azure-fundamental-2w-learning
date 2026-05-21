@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Azure Database for PostgreSQL Flexible Server
-The system SHALL provision an Azure Database for PostgreSQL Flexible Server `psql-skillplatform-prod` in `southeastasia` using SKU `B_Standard_B1ms` (Burstable B1ms), Postgres major version `16`, storage `32` GB, backup retention `7` days, geo-redundant backup `false`, public network access disabled, and VNet-injected into `snet-db`. The server SHALL host a single database `skillplatform` owned by the admin user. The admin password SHALL come from a Terraform variable, NOT a literal, and SHALL be written to Key Vault as the secret `postgres-admin-password` plus a separate composed connection-string secret `database-url` (URL-encoded).
+The system SHALL provision an Azure Database for PostgreSQL Flexible Server `psql-skillplatform-prod` in `japaneast` using SKU `B_Standard_B1ms` (Burstable B1ms), Postgres major version `16`, storage `32` GB, backup retention `7` days, geo-redundant backup `false`, public network access disabled, and VNet-injected into `snet-db`. The server SHALL host a single database `skillplatform` owned by the admin user. The admin password SHALL come from a Terraform variable, NOT a literal, and SHALL be written to Key Vault as the secret `postgres-admin-password` plus a separate composed connection-string secret `database-url` (URL-encoded).
 
 #### Scenario: Postgres is unreachable from public internet
 - **WHEN** an operator runs `psql 'host=psql-skillplatform-prod.postgres.database.azure.com port=5432 user=...'` from a public network

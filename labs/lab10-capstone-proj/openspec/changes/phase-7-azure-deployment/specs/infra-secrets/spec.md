@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Key Vault provisioning
-The system SHALL provision an Azure Key Vault `kv-skillplatform-prod` in `southeastasia` with SKU `standard`, soft-delete enabled (90-day retention), purge protection enabled, public network access disabled, and `enable_rbac_authorization = true` (RBAC mode, not legacy access policies). A Private Endpoint in `snet-pe` SHALL be the only network path to the vault.
+The system SHALL provision an Azure Key Vault `kv-skillplatform-prod` in `japaneast` with SKU `standard`, soft-delete enabled (90-day retention), purge protection enabled, public network access disabled, and `enable_rbac_authorization = true` (RBAC mode, not legacy access policies). A Private Endpoint in `snet-pe` SHALL be the only network path to the vault.
 
 #### Scenario: Key Vault uses RBAC, not access policies
 - **WHEN** an operator inspects the Key Vault's Access Configuration blade

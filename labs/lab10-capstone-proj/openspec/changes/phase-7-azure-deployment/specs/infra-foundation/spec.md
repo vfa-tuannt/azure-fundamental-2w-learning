@@ -20,11 +20,11 @@ The system SHALL provide an `infra/` directory at the repo root containing a `bo
 - **THEN** every resource in the plan output that supports tagging has the three required tags
 
 ### Requirement: Workload resource group
-The system SHALL provision exactly one resource group `rg-skillplatform-prod` in region `southeastasia` that owns every workload resource. The bootstrap stack SHALL also create a second resource group `rg-skillplatform-tfstate` (in the same region) that owns only the Terraform state Storage Account.
+The system SHALL provision exactly one resource group `rg-skillplatform-prod` in region `japaneast` that owns every workload resource. The bootstrap stack SHALL also create a second resource group `rg-skillplatform-tfstate` (in the same region) that owns only the Terraform state Storage Account.
 
 #### Scenario: Resource group exists post-apply
 - **WHEN** `terraform apply` completes for the main stack
-- **THEN** `rg-skillplatform-prod` exists in `southeastasia` and contains every other resource provisioned by the main stack
+- **THEN** `rg-skillplatform-prod` exists in `japaneast` and contains every other resource provisioned by the main stack
 
 #### Scenario: Destroying the workload does not touch state
 - **WHEN** an operator runs `terraform destroy` on the main stack

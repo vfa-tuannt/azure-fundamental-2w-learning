@@ -16,7 +16,7 @@ Each section ends with a **Demo checkpoint** the user can show to a teammate to 
 - [ ] 0.4 Install Docker Desktop (if not present) and confirm `docker version` works (needed for thumbnail image builds locally).
 - [ ] 0.5 Install Azure Functions Core Tools 4 (`npm i -g azure-functions-core-tools@4 --unsafe-perm true`); run `func --version`.
 - [ ] 0.6 Generate a fresh RS256 key pair locally (`openssl genrsa -out jwt-private.pem 2048 && openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem`). Keep both files **outside** the repo — they will be loaded into Key Vault via Terraform variables.
-- [ ] 0.7 Decide region: the project uses `southeastasia` everywhere. Note your chosen region's quota for B-series VMs (Postgres B1ms, App Service B1) under Subscription → Usage + quotas; raise the limit if it shows zero.
+- [ ] 0.7 Decide region: the project uses `japaneast` everywhere. Note your chosen region's quota for B-series VMs (Postgres B1ms, App Service B1) under Subscription → Usage + quotas; raise the limit if it shows zero.
 
 ---
 
@@ -26,7 +26,7 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.1 Bootstrap remote Terraform state
 
-- [ ] 1.1.1 **(Portal)** Create resource group `rg-skillplatform-tfstate` in Southeast Asia. Note the Overview pane fields — Subscription ID, Location, Tags. **Screenshot the Overview blade for your own reference**, then delete the RG.
+- [ ] 1.1.1 **(Portal)** Create resource group `rg-skillplatform-tfstate` in Japan East. Note the Overview pane fields — Subscription ID, Location, Tags. **Screenshot the Overview blade for your own reference**, then delete the RG.
 - [ ] 1.1.2 Add `infra/` to `.gitignore` for `*.tfstate`, `*.tfstate.backup`, `.terraform/`, `.terraform.lock.hcl` (keep the lock file actually; gitignore only the cache).
 - [ ] 1.1.3 Create `infra/bootstrap/main.tf` declaring the `azurerm` provider with `features {}`, a `random_string` for the storage account suffix (lowercase, 6 chars), and two resources: `azurerm_resource_group.tfstate` and `azurerm_storage_account.tfstate` (LRS, kind `StorageV2`, `min_tls_version = "TLS1_2"`, blob soft-delete OFF for tfstate, `shared_access_key_enabled = true`). Also create `azurerm_storage_container.tfstate` named `tfstate`.
 - [ ] 1.1.4 Run `terraform init && terraform plan && terraform apply` from `infra/bootstrap/`. Confirm in the Portal that the RG and Storage Account exist.
@@ -44,7 +44,7 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 - [ ] 1.3.1 Create `infra/main/` with `versions.tf` (require `azurerm ~> 4.0`, `random ~> 3.6`).
 - [ ] 1.3.2 Create `infra/main/backend.tf` with `terraform { backend "azurerm" { resource_group_name = "rg-skillplatform-tfstate"; storage_account_name = "<from-output>"; container_name = "tfstate"; key = "skillplatform-prod.tfstate" } }`.
-- [ ] 1.3.3 Create `infra/main/variables.tf` with required vars: `location` (default `southeastasia`), `pg_admin_user`, `pg_admin_password` (sensitive), `google_client_id` (sensitive), `google_client_secret` (sensitive), `jwt_private_key` (sensitive), `jwt_public_key`, `alert_email`, `apim_publisher_email`, `apim_publisher_name`.
+- [ ] 1.3.3 Create `infra/main/variables.tf` with required vars: `location` (default `japaneast`), `pg_admin_user`, `pg_admin_password` (sensitive), `google_client_id` (sensitive), `google_client_secret` (sensitive), `jwt_private_key` (sensitive), `jwt_public_key`, `alert_email`, `apim_publisher_email`, `apim_publisher_name`.
 - [ ] 1.3.4 Create `infra/main/locals.tf` with `naming = { rg = "rg-skillplatform-prod", vnet = "vnet-skillplatform-prod", ... }` (one entry per resource type — see proposal Capabilities list) and `tags = { project = "skillplatform", env = "prod", managedBy = "terraform" }`.
 - [ ] 1.3.5 Create `infra/main/providers.tf` with `provider "azurerm" { features { key_vault { purge_soft_deleted_secrets_on_destroy = false } } }`.
 - [ ] 1.3.6 Create `infra/main/terraform.tfvars.example` listing all variables (no values) and add `infra/main/terraform.tfvars` to `.gitignore`.
@@ -52,7 +52,7 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.4 Resource Group + VNet (Day 8 hands-on)
 
-- [ ] 1.4.1 **(Portal)** Create RG `rg-skillplatform-prod` in Southeast Asia with tags `project=skillplatform, env=prod`. Confirm Overview. **Screenshot.**
+- [ ] 1.4.1 **(Portal)** Create RG `rg-skillplatform-prod` in Japan East with tags `project=skillplatform, env=prod`. Confirm Overview. **Screenshot.**
 - [ ] 1.4.2 **(Portal)** Inside the RG → Create → search "Virtual network". Wizard: name `vnet-skillplatform-prod`, address space `10.20.0.0/16`. Add subnets one by one in the wizard's Subnets tab:
   - `snet-app` `10.20.1.0/24` → after creating, open the subnet, find **Delegate subnet to a service** → `Microsoft.Web/serverFarms`. **Note** what the delegation does (PrimePort permissions).
   - `snet-pe` `10.20.2.0/24` → no delegation. Set **Private endpoint network policies** to Disabled.
@@ -76,7 +76,7 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 - [ ] 1.6.1 **(Portal)** Create → "Azure Database for PostgreSQL flexible servers" → Flexible server. Wizard:
   - Server name `psql-skillplatform-prod` (must be globally unique; if taken, append `-2`).
-  - Region Southeast Asia.
+  - Region Japan East.
   - Postgres version 16.
   - Workload type Development.
   - Compute Burstable B1ms.
@@ -160,7 +160,7 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 
 ### 2.1 App Service Plan + App Service
 
-- [ ] 2.1.1 **(Portal)** Create App Service Plan `plan-skillplatform-prod`, Linux, B1, region Southeast Asia. Then App Service `app-skillplatform-prod` on it, runtime Node 24 LTS, region same as plan.
+- [ ] 2.1.1 **(Portal)** Create App Service Plan `plan-skillplatform-prod`, Linux, B1, region Japan East. Then App Service `app-skillplatform-prod` on it, runtime Node 24 LTS, region same as plan.
 - [ ] 2.1.2 **(Portal)** App Service → Identity → System assigned → On → Save. Note the **Object (principal) ID**.
 - [ ] 2.1.3 **(Portal)** Networking → VNet integration → Add VNet integration → Region match, VNet `vnet-skillplatform-prod`, subnet `snet-app`. Confirm "Outbound traffic routed through VNet" is ON.
 - [ ] 2.1.4 **(Portal)** Health check → enable, path `/health`, 2 min window.

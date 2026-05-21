@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Static Web Apps Free-tier resource
-The system SHALL provision an Azure Static Web App `stapp-skillplatform-prod` on the Free SKU, region `eastasia` (the closest SWA region to `southeastasia`), with build provider `Custom` (deployed via GitHub Actions, not the built-in build pipeline). The frontend SHALL be deployed by the [infra-cicd](../infra-cicd/spec.md) workflow.
+The system SHALL provision an Azure Static Web App `stapp-skillplatform-prod` on the Free SKU, region `eastasia` (the closest SWA region to `japaneast`), with build provider `Custom` (deployed via GitHub Actions, not the built-in build pipeline). The frontend SHALL be deployed by the [infra-cicd](../infra-cicd/spec.md) workflow.
 
 #### Scenario: Default hostname is published
 - **WHEN** `terraform output static_web_app_url` is run

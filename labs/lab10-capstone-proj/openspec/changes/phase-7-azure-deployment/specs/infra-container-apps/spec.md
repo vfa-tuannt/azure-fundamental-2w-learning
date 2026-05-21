@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Container Apps environment (VNet-injected)
-The system SHALL provision a Container Apps environment `cae-skillplatform-prod` in `southeastasia`, infrastructure subnet `snet-aca`, internal-only ingress DISABLED (the environment must be reachable from the App Service over the VNet but external ingress is also allowed for the thumbnail App's APIM-fronted route), and the shared Log Analytics workspace `log-skillplatform-prod` attached.
+The system SHALL provision a Container Apps environment `cae-skillplatform-prod` in `japaneast`, infrastructure subnet `snet-aca`, internal-only ingress DISABLED (the environment must be reachable from the App Service over the VNet but external ingress is also allowed for the thumbnail App's APIM-fronted route), and the shared Log Analytics workspace `log-skillplatform-prod` attached.
 
 #### Scenario: Environment uses snet-aca
 - **WHEN** an operator views the Container Apps environment's Networking blade

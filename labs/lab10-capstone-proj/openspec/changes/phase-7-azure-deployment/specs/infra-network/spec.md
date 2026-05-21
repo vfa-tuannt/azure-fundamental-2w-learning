@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Virtual network and subnets
-The system SHALL provision one Virtual Network `vnet-skillplatform-prod` with address space `10.20.0.0/16` in region `southeastasia`, and exactly four subnets:
+The system SHALL provision one Virtual Network `vnet-skillplatform-prod` with address space `10.20.0.0/16` in region `japaneast`, and exactly four subnets:
 - `snet-app` (`10.20.1.0/24`), delegated to `Microsoft.Web/serverFarms` so an App Service can VNet-integrate into it.
 - `snet-pe` (`10.20.2.0/24`), with `private_endpoint_network_policies = "Disabled"` so Private Endpoints can attach.
 - `snet-db` (`10.20.3.0/24`), delegated to `Microsoft.DBforPostgreSQL/flexibleServers` (a hard requirement of Postgres Flexible Server in VNet-injected mode).

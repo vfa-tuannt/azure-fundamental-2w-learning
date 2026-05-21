@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Azure Container Registry (Basic tier)
-The system SHALL provision an Azure Container Registry `acrskillplatformprod` in `southeastasia` with SKU `Basic`, admin user DISABLED, public network access disabled, and a Private Endpoint in `snet-pe`. The registry SHALL be reachable from the Container Apps environment over the VNet only.
+The system SHALL provision an Azure Container Registry `acrskillplatformprod` in `japaneast` with SKU `Basic`, admin user DISABLED, public network access disabled, and a Private Endpoint in `snet-pe`. The registry SHALL be reachable from the Container Apps environment over the VNet only.
 
 #### Scenario: Registry admin user is off
 - **WHEN** an operator views the ACR Access Keys blade

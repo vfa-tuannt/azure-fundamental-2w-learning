@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: APIM Consumption-tier instance
-The system SHALL provision an Azure API Management instance `apim-skillplatform-prod` in `southeastasia` on the Consumption SKU, publisher email and name supplied via Terraform variables, and a system-assigned managed identity. The Developer Portal SHALL be enabled and reachable at the default `*.developer.azure-api.net` hostname.
+The system SHALL provision an Azure API Management instance `apim-skillplatform-prod` in `japaneast` on the Consumption SKU, publisher email and name supplied via Terraform variables, and a system-assigned managed identity. The Developer Portal SHALL be enabled and reachable at the default `*.developer.azure-api.net` hostname.
 
 #### Scenario: APIM SKU is Consumption
 - **WHEN** an operator views the APIM Overview blade
