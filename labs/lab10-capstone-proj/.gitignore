@@ -1,0 +1,18 @@
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
+# Environment files
+.env
+*.pem
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store

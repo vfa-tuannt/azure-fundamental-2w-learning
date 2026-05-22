@@ -10,13 +10,13 @@ Each section ends with a **Demo checkpoint** the user can show to a teammate to 
 
 ## 0. One-time prerequisites
 
-- [ ] 0.1 Sign in to the Azure student subscription at https://portal.azure.com; **(Portal)** confirm the subscription name in the top bar matches the one with the $100 credit.
-- [ ] 0.2 Install Azure CLI 2.60+ (`brew install azure-cli`); run `az login` and `az account show` to confirm the active subscription.
-- [ ] 0.3 Install Terraform 1.8+ (`brew install terraform`); run `terraform -version`.
-- [ ] 0.4 Install Docker Desktop (if not present) and confirm `docker version` works (needed for thumbnail image builds locally).
-- [ ] 0.5 Install Azure Functions Core Tools 4 (`npm i -g azure-functions-core-tools@4 --unsafe-perm true`); run `func --version`.
-- [ ] 0.6 Generate a fresh RS256 key pair locally (`openssl genrsa -out jwt-private.pem 2048 && openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem`). Keep both files **outside** the repo — they will be loaded into Key Vault via Terraform variables.
-- [ ] 0.7 Decide region: the project uses `japaneast` everywhere. Note your chosen region's quota for B-series VMs (Postgres B1ms, App Service B1) under Subscription → Usage + quotas; raise the limit if it shows zero.
+- [x] 0.1 Sign in to the Azure student subscription at https://portal.azure.com; **(Portal)** confirm the subscription name in the top bar matches the one with the $100 credit.
+- [x] 0.2 Install Azure CLI 2.60+ (`brew install azure-cli`); run `az login` and `az account show` to confirm the active subscription.
+- [x] 0.3 Install Terraform 1.8+ (`brew install terraform`); run `terraform -version`.
+- [x] 0.4 Install Docker Desktop (if not present) and confirm `docker version` works (needed for thumbnail image builds locally).
+- [x] 0.5 Install Azure Functions Core Tools 4 (`npm i -g azure-functions-core-tools@4 --unsafe-perm true`); run `func --version`.
+- [x] 0.6 Generate a fresh RS256 key pair locally (`openssl genrsa -out jwt-private.pem 2048 && openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem`). Keep both files **outside** the repo — they will be loaded into Key Vault via Terraform variables.
+- [x] 0.7 Decide region: the project uses `japaneast` everywhere. Note your chosen region's quota for B-series VMs (Postgres B1ms, App Service B1) under Subscription → Usage + quotas; raise the limit if it shows zero.
 
 ---
 
@@ -26,12 +26,12 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.1 Bootstrap remote Terraform state
 
-- [ ] 1.1.1 **(Portal)** Create resource group `rg-skillplatform-tfstate` in Japan East. Note the Overview pane fields — Subscription ID, Location, Tags. **Screenshot the Overview blade for your own reference**, then delete the RG.
-- [ ] 1.1.2 Add `infra/` to `.gitignore` for `*.tfstate`, `*.tfstate.backup`, `.terraform/`, `.terraform.lock.hcl` (keep the lock file actually; gitignore only the cache).
-- [ ] 1.1.3 Create `infra/bootstrap/main.tf` declaring the `azurerm` provider with `features {}`, a `random_string` for the storage account suffix (lowercase, 6 chars), and two resources: `azurerm_resource_group.tfstate` and `azurerm_storage_account.tfstate` (LRS, kind `StorageV2`, `min_tls_version = "TLS1_2"`, blob soft-delete OFF for tfstate, `shared_access_key_enabled = true`). Also create `azurerm_storage_container.tfstate` named `tfstate`.
-- [ ] 1.1.4 Run `terraform init && terraform plan && terraform apply` from `infra/bootstrap/`. Confirm in the Portal that the RG and Storage Account exist.
-- [ ] 1.1.5 **(Portal)** Open the Storage Account → Containers → `tfstate`. Confirm it's empty for now. **Screenshot.**
-- [ ] 1.1.6 Capture the Storage Account name as a Terraform output (`output "tfstate_storage_account" { value = azurerm_storage_account.tfstate.name }`); copy it for the next section.
+- [x] 1.1.1 **(Portal)** Create resource group `rg-skillplatform-tfstate` in Japan East. Note the Overview pane fields — Subscription ID, Location, Tags. **Screenshot the Overview blade for your own reference**, then delete the RG.
+- [x] 1.1.2 Add `infra/` to `.gitignore` for `*.tfstate`, `*.tfstate.backup`, `.terraform/`, `.terraform.lock.hcl` (keep the lock file actually; gitignore only the cache).
+- [x] 1.1.3 Create `infra/bootstrap/main.tf` declaring the `azurerm` provider with `features {}`, a `random_string` for the storage account suffix (lowercase, 6 chars), and two resources: `azurerm_resource_group.tfstate` and `azurerm_storage_account.tfstate` (LRS, kind `StorageV2`, `min_tls_version = "TLS1_2"`, blob soft-delete OFF for tfstate, `shared_access_key_enabled = true`). Also create `azurerm_storage_container.tfstate` named `tfstate`.
+- [x] 1.1.4 Run `terraform init && terraform plan && terraform apply` from `infra/bootstrap/`. Confirm in the Portal that the RG and Storage Account exist.
+- [x] 1.1.5 **(Portal)** Open the Storage Account → Containers → `tfstate`. Confirm it's empty for now. **Screenshot.**
+- [x] 1.1.6 Capture the Storage Account name as a Terraform output (`output "tfstate_storage_account" { value = azurerm_storage_account.tfstate.name }`); copy it for the next section.
 
 ### 1.2 Bootstrap GitHub OIDC identity (for CI/CD later, set up now to avoid context switch)
 
