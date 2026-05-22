@@ -35,10 +35,10 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.2 Bootstrap GitHub OIDC identity (for CI/CD later, set up now to avoid context switch)
 
-- [ ] 1.2.1 **(Portal)** Open Microsoft Entra ID → App registrations → New registration. Name `gh-skillplatform-deploy`, single tenant, no redirect URI. Note the **Application (client) ID** and **Directory (tenant) ID** on the Overview pane. **Screenshot.**
-- [ ] 1.2.2 **(Portal)** Inside the App → Certificates & secrets → Federated credentials → Add credential. Issuer `https://token.actions.githubusercontent.com`, subject identifier `repo:<gh-org>/<repo>:ref:refs/heads/main`. Confirm the dropdown showed both "GitHub Actions deploying Azure resources" and the federated credential form.
+- [x] 1.2.1 **(Portal)** Open Microsoft Entra ID → App registrations → New registration. Name `gh-skillplatform-deploy`, single tenant, no redirect URI. Note the **Application (client) ID** and **Directory (tenant) ID** on the Overview pane. **Screenshot.**
+- [x] 1.2.2 **(Portal)** Inside the App → Certificates & secrets → Federated credentials → Add credential. Issuer `https://token.actions.githubusercontent.com`, subject identifier `repo:<gh-org>/<repo>:ref:refs/heads/main`. Confirm the dropdown showed both "GitHub Actions deploying Azure resources" and the federated credential form.
 - [ ] 1.2.3 **(Portal)** Open Subscription → Access control (IAM) → Add role assignment → `Contributor` → assign to `gh-skillplatform-deploy`. **Limit scope to `rg-skillplatform-prod`** — but the RG doesn't exist yet, so do this after task 1.4.1. Mark this checkbox after the RG exists.
-- [ ] 1.2.4 Add the three IDs to GitHub repo secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`. Do NOT add a client secret — OIDC eliminates it.
+- [x] 1.2.4 Add the three IDs to GitHub repo secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`. Do NOT add a client secret — OIDC eliminates it.
 
 ### 1.3 Main Terraform stack skeleton
 
