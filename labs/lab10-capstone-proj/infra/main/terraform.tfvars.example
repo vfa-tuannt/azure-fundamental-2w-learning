@@ -1,0 +1,28 @@
+# Copy this file to terraform.tfvars and fill in real values.
+# terraform.tfvars is gitignored — never commit it.
+
+location = "japaneast"
+
+pg_admin_user     = "skillplatformadmin"
+pg_admin_password = "CHANGE_ME_min8_Upper1_Digit1!"
+
+google_client_id     = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+google_client_secret = "YOUR_GOOGLE_CLIENT_SECRET"
+
+# Paste the full PEM content (including header/footer lines).
+# Newlines inside the PEM must be literal newlines (not \n escapes).
+jwt_private_key = <<EOT
+-----BEGIN PRIVATE KEY-----
+...
+-----END PRIVATE KEY-----
+EOT
+
+jwt_public_key = <<EOT
+-----BEGIN PUBLIC KEY-----
+...
+-----END PUBLIC KEY-----
+EOT
+
+alert_email          = "your-email@example.com"
+apim_publisher_email = "your-email@example.com"
+apim_publisher_name  = "Skillplatform Team"

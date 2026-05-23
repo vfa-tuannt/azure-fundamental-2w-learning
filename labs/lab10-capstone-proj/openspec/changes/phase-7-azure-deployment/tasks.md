@@ -42,13 +42,13 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.3 Main Terraform stack skeleton
 
-- [ ] 1.3.1 Create `infra/main/` with `versions.tf` (require `azurerm ~> 4.0`, `random ~> 3.6`).
-- [ ] 1.3.2 Create `infra/main/backend.tf` with `terraform { backend "azurerm" { resource_group_name = "rg-skillplatform-tfstate"; storage_account_name = "<from-output>"; container_name = "tfstate"; key = "skillplatform-prod.tfstate" } }`.
-- [ ] 1.3.3 Create `infra/main/variables.tf` with required vars: `location` (default `japaneast`), `pg_admin_user`, `pg_admin_password` (sensitive), `google_client_id` (sensitive), `google_client_secret` (sensitive), `jwt_private_key` (sensitive), `jwt_public_key`, `alert_email`, `apim_publisher_email`, `apim_publisher_name`.
-- [ ] 1.3.4 Create `infra/main/locals.tf` with `naming = { rg = "rg-skillplatform-prod", vnet = "vnet-skillplatform-prod", ... }` (one entry per resource type — see proposal Capabilities list) and `tags = { project = "skillplatform", env = "prod", managedBy = "terraform" }`.
-- [ ] 1.3.5 Create `infra/main/providers.tf` with `provider "azurerm" { features { key_vault { purge_soft_deleted_secrets_on_destroy = false } } }`.
-- [ ] 1.3.6 Create `infra/main/terraform.tfvars.example` listing all variables (no values) and add `infra/main/terraform.tfvars` to `.gitignore`.
-- [ ] 1.3.7 `terraform init` succeeds; `terraform validate` is clean.
+- [x] 1.3.1 Create `infra/main/` with `versions.tf` (require `azurerm ~> 4.0`, `random ~> 3.6`).
+- [x] 1.3.2 Create `infra/main/backend.tf` with `terraform { backend "azurerm" { resource_group_name = "rg-skillplatform-tfstate"; storage_account_name = "<from-output>"; container_name = "tfstate"; key = "skillplatform-prod.tfstate" } }`.
+- [x] 1.3.3 Create `infra/main/variables.tf` with required vars: `location` (default `japaneast`), `pg_admin_user`, `pg_admin_password` (sensitive), `google_client_id` (sensitive), `google_client_secret` (sensitive), `jwt_private_key` (sensitive), `jwt_public_key`, `alert_email`, `apim_publisher_email`, `apim_publisher_name`.
+- [x] 1.3.4 Create `infra/main/locals.tf` with `naming = { rg = "rg-skillplatform-prod", vnet = "vnet-skillplatform-prod", ... }` (one entry per resource type — see proposal Capabilities list) and `tags = { project = "skillplatform", env = "prod", managedBy = "terraform" }`.
+- [x] 1.3.5 Create `infra/main/providers.tf` with `provider "azurerm" { features { key_vault { purge_soft_deleted_secrets_on_destroy = false } } }`.
+- [x] 1.3.6 Create `infra/main/terraform.tfvars.example` listing all variables (no values) and add `infra/main/terraform.tfvars` to `.gitignore`.
+- [x] 1.3.7 `terraform init` succeeds; `terraform validate` is clean.
 
 ### 1.4 Resource Group + VNet (Day 8 hands-on)
 
