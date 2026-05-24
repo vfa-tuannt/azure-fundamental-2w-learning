@@ -37,7 +37,7 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 - [x] 1.2.1 **(Portal)** Open Microsoft Entra ID → App registrations → New registration. Name `gh-skillplatform-deploy`, single tenant, no redirect URI. Note the **Application (client) ID** and **Directory (tenant) ID** on the Overview pane. **Screenshot.**
 - [x] 1.2.2 **(Portal)** Inside the App → Certificates & secrets → Federated credentials → Add credential. Issuer `https://token.actions.githubusercontent.com`, subject identifier `repo:<gh-org>/<repo>:ref:refs/heads/main`. Confirm the dropdown showed both "GitHub Actions deploying Azure resources" and the federated credential form.
-- [ ] 1.2.3 **(Portal)** Open Subscription → Access control (IAM) → Add role assignment → `Contributor` → assign to `gh-skillplatform-deploy`. **Limit scope to `rg-skillplatform-prod`** — but the RG doesn't exist yet, so do this after task 1.4.1. Mark this checkbox after the RG exists.
+- [x] 1.2.3 **(Portal)** Open Subscription → Access control (IAM) → Add role assignment → `Contributor` → assign to `gh-skillplatform-deploy`. **Limit scope to `rg-skillplatform-prod`** — but the RG doesn't exist yet, so do this after task 1.4.1. Mark this checkbox after the RG exists.
 - [x] 1.2.4 Add the three IDs to GitHub repo secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`. Do NOT add a client secret — OIDC eliminates it.
 
 ### 1.3 Main Terraform stack skeleton
@@ -52,18 +52,18 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.4 Resource Group + VNet (Day 8 hands-on)
 
-- [ ] 1.4.1 **(Portal)** Create RG `rg-skillplatform-prod` in Japan East with tags `project=skillplatform, env=prod`. Confirm Overview. **Screenshot.**
-- [ ] 1.4.2 **(Portal)** Inside the RG → Create → search "Virtual network". Wizard: name `vnet-skillplatform-prod`, address space `10.20.0.0/16`. Add subnets one by one in the wizard's Subnets tab:
+- [x] 1.4.1 **(Portal)** Create RG `rg-skillplatform-prod` in Japan East with tags `project=skillplatform, env=prod`. Confirm Overview. **Screenshot.**
+- [x] 1.4.2 **(Portal)** Inside the RG → Create → search "Virtual network". Wizard: name `vnet-skillplatform-prod`, address space `10.20.0.0/16`. Add subnets one by one in the wizard's Subnets tab:
   - `snet-app` `10.20.1.0/24` → after creating, open the subnet, find **Delegate subnet to a service** → `Microsoft.Web/serverFarms`. **Note** what the delegation does (PrimePort permissions).
   - `snet-pe` `10.20.2.0/24` → no delegation. Set **Private endpoint network policies** to Disabled.
   - `snet-db` `10.20.3.0/24` → delegate to `Microsoft.DBforPostgreSQL/flexibleServers`.
   - `snet-aca` `10.20.4.0/27` → no delegation (Container Apps environment will claim this subnet at creation).
-- [ ] 1.4.3 **(Portal)** Inspect the VNet's "Connected devices" tab — empty for now. Inspect "DNS servers" → Default (Azure-provided). **Screenshot the Subnets blade** showing all four subnets.
-- [ ] 1.4.4 **(Portal)** Create NSG `nsg-app` in the RG with one inbound rule: source `ServiceTag` `ApiManagement` → port 443 → priority 100 → action Allow. Associate `nsg-app` with subnet `snet-app`.
-- [ ] 1.4.5 **(Portal)** Create NSG `nsg-pe` and `nsg-db` with no custom rules (default deny inbound from Internet is sufficient). Associate them with `snet-pe` and `snet-db` respectively.
-- [ ] 1.4.6 **(Terraform)** Now reproduce 1.4.1–1.4.5 in Terraform. Write `infra/main/modules/network/` with `main.tf`, `variables.tf`, `outputs.tf`. The module SHALL produce a `vnet`, four `subnet` resources with correct delegations, three `network_security_group` resources, and three `subnet_network_security_group_association` resources.
-- [ ] 1.4.7 **(Portal)** Delete the manually-created VNet + NSGs. Run `terraform plan` — should show 4 subnets + 1 VNet + 3 NSGs + 3 associations to create. `terraform apply`. Confirm the portal again shows the same topology you saw in 1.4.3.
-- [ ] 1.4.8 **(Portal)** Open one subnet (e.g., `snet-app`) and click **Service endpoints** tab to *see* what they are (we don't use them — we use Private Endpoints — but understanding the difference is useful). Note: service endpoints are subnet-scoped firewall openings; private endpoints are full NICs in your subnet.
+- [x] 1.4.3 **(Portal)** Inspect the VNet's "Connected devices" tab — empty for now. Inspect "DNS servers" → Default (Azure-provided). **Screenshot the Subnets blade** showing all four subnets.
+- [x] 1.4.4 **(Portal)** Create NSG `nsg-app` in the RG with one inbound rule: source `ServiceTag` `ApiManagement` → port 443 → priority 100 → action Allow. Associate `nsg-app` with subnet `snet-app`.
+- [x] 1.4.5 **(Portal)** Create NSG `nsg-pe` and `nsg-db` with no custom rules (default deny inbound from Internet is sufficient). Associate them with `snet-pe` and `snet-db` respectively.
+- [x] 1.4.6 **(Terraform)** Now reproduce 1.4.1–1.4.5 in Terraform. Write `infra/main/modules/network/` with `main.tf`, `variables.tf`, `outputs.tf`. The module SHALL produce a `vnet`, four `subnet` resources with correct delegations, three `network_security_group` resources, and three `subnet_network_security_group_association` resources.
+- [x] 1.4.7 **(Portal)** Delete the manually-created VNet + NSGs. Run `terraform plan` — should show 4 subnets + 1 VNet + 3 NSGs + 3 associations to create. `terraform apply`. Confirm the portal again shows the same topology you saw in 1.4.3.
+- [x] 1.4.8 **(Portal)** Open one subnet (e.g., `snet-app`) and click **Service endpoints** tab to *see* what they are (we don't use them — we use Private Endpoints — but understanding the difference is useful). Note: service endpoints are subnet-scoped firewall openings; private endpoints are full NICs in your subnet.
 
 ### 1.5 Private DNS zones
 

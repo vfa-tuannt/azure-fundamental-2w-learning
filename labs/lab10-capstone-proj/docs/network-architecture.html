@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1.4 · VNet, Subnet, Delegation, Private Endpoint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-soft:    #7a8399;
+      --color-accent:  #eb6c36;
+      --color-link:    #2e5aa8;
+      --color-rule:    rgba(45, 49, 66, 0.12);
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      padding: 3rem 2rem;
+      line-height: 1.55;
+    }
+
+    .frame { max-width: 1100px; margin: 0 auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 2.4vw + 0.75rem, 2.25rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      margin: 2.5rem 0 0.75rem;
+      color: var(--color-ink);
+    }
+
+    h3 {
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 1.25rem 0 0.4rem;
+      color: var(--color-ink);
+    }
+
+    p, li { color: var(--color-ink); font-size: 0.95rem; }
+    p + p { margin-top: 0.75rem; }
+
+    .lede {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--color-muted);
+      margin-bottom: 2rem;
+      max-width: 70ch;
+    }
+
+    svg { width: 100%; min-width: 900px; display: block; margin: 1.5rem 0; }
+
+    ul { margin-left: 1.25rem; }
+    li { margin-top: 0.35rem; }
+
+    code, .mono {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: rgba(45, 49, 66, 0.06);
+      padding: 0.1em 0.4em;
+      border-radius: 3px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--color-rule);
+      border-radius: 6px;
+      padding: 1.25rem 1.4rem;
+    }
+
+    .card .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+    .card-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .card-dot.coral { background: var(--color-accent); }
+    .card-dot.ink   { background: var(--color-ink); }
+    .card-dot.muted { background: var(--color-muted); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--color-rule);
+      vertical-align: top;
+    }
+    th {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      font-weight: 500;
+    }
+    td code { font-size: 0.8em; }
+
+    .colophon {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-rule);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--color-soft);
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Phase 7 · Lab 10 · Infra Network</p>
+    <h1>VNet, Subnet, Delegation & Private Endpoint</h1>
+    <p class="lede">Một VNet, bốn subnet, hai cơ chế gắn dịch vụ Azure vào mạng riêng — Delegation và Private Endpoint không thay thế nhau, mà mỗi cái giải quyết một bài toán khác.</p>
+
+    <svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- VNet boundary (dashed) -->
+      <rect x="60" y="120" width="880" height="440" rx="8" fill="none"
+            stroke="#7a8399" stroke-width="1" stroke-dasharray="5,4"/>
+      <rect x="80" y="108" width="200" height="24" rx="2" fill="#f5f5f5"/>
+      <text x="92" y="124" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"
+            letter-spacing="0.12em">VNET · 10.20.0.0/16</text>
+
+      <!-- ARROWS first (z-order behind boxes) -->
+      <!-- APIM → App Service -->
+      <line x1="280" y1="64" x2="280" y2="196" stroke="#2e5aa8" stroke-width="1.4" marker-end="url(#arrow-link)"/>
+      <!-- App Service → PostgreSQL (intra-VNet) -->
+      <line x1="240" y1="296" x2="240" y2="380" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- App Service → Private Endpoints (intra-VNet) -->
+      <line x1="360" y1="240" x2="540" y2="240" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- App Service → Container App -->
+      <line x1="360" y1="276" x2="540" y2="424" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- Private Endpoints → External PaaS (focal flow — Private Link tunnel) -->
+      <line x1="780" y1="296" x2="780" y2="620" stroke="#eb6c36" stroke-width="1.6"
+            stroke-dasharray="5,4" marker-end="url(#arrow-accent)"/>
+
+      <!-- Arrow labels -->
+      <rect x="262" y="120" width="36" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="280" y="129" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">HTTPS</text>
+
+      <rect x="220" y="332" width="40" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="240" y="341" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">5432</text>
+
+      <rect x="424" y="232" width="32" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="440" y="241" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">SDK</text>
+
+      <rect x="762" y="440" width="40" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="782" y="449" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">P-LINK</text>
+
+      <!-- ===== Subnet boundaries (dashed sub-rectangles) ===== -->
+      <!-- snet-app -->
+      <rect x="100" y="160" width="320" height="160" rx="6" fill="none"
+            stroke="rgba(45,49,66,0.25)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <rect x="116" y="148" width="180" height="20" rx="2" fill="#f5f5f5"/>
+      <text x="124" y="161" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"
+            letter-spacing="0.1em">SNET-APP · 10.20.1.0/24</text>
+
+      <!-- snet-pe -->
+      <rect x="500" y="160" width="380" height="160" rx="6" fill="none"
+            stroke="rgba(45,49,66,0.25)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <rect x="516" y="148" width="184" height="20" rx="2" fill="#f5f5f5"/>
+      <text x="524" y="161" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"
+            letter-spacing="0.1em">SNET-PE · 10.20.2.0/24</text>
+
+      <!-- snet-db -->
+      <rect x="100" y="360" width="320" height="160" rx="6" fill="none"
+            stroke="rgba(45,49,66,0.25)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <rect x="116" y="348" width="180" height="20" rx="2" fill="#f5f5f5"/>
+      <text x="124" y="361" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"
+            letter-spacing="0.1em">SNET-DB · 10.20.3.0/24</text>
+
+      <!-- snet-aca -->
+      <rect x="500" y="360" width="380" height="160" rx="6" fill="none"
+            stroke="rgba(45,49,66,0.25)" stroke-width="0.8" stroke-dasharray="4,3"/>
+      <rect x="516" y="348" width="184" height="20" rx="2" fill="#f5f5f5"/>
+      <text x="524" y="361" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"
+            letter-spacing="0.1em">SNET-ACA · 10.20.4.0/27</text>
+
+      <!-- ===== Nodes ===== -->
+      <!-- Node: APIM (external, top) -->
+      <rect x="216" y="32" width="128" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="216" y="32" width="128" height="64" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <rect x="224" y="40" width="32" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.22)" stroke-width="0.8"/>
+      <text x="240" y="49" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">EDGE</text>
+      <text x="280" y="68" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">APIM</text>
+      <text x="280" y="84" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">api.example.com</text>
+
+      <!-- Node: App Service (FOCAL coral) -->
+      <rect x="128" y="196" width="232" height="80" rx="6" fill="#f5f5f5"/>
+      <rect x="128" y="196" width="232" height="80" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <rect x="136" y="204" width="44" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.50)" stroke-width="0.8"/>
+      <text x="158" y="213" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">DELEG</text>
+      <text x="244" y="236" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">App Service (NestJS)</text>
+      <text x="244" y="252" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Microsoft.Web/serverFarms</text>
+      <text x="244" y="266" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">VNet integration · 10.20.1.x</text>
+
+      <!-- Node: Private Endpoints group -->
+      <rect x="540" y="196" width="304" height="80" rx="6" fill="#f5f5f5"/>
+      <rect x="540" y="196" width="304" height="80" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="548" y="204" width="32" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="564" y="213" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">PE</text>
+      <text x="692" y="236" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">5 × Private Endpoint</text>
+      <text x="692" y="252" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Postgres · Storage · KeyVault</text>
+      <text x="692" y="266" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Cosmos · ACR  (NIC trong snet-pe)</text>
+
+      <!-- Node: PostgreSQL (delegated, in snet-db) -->
+      <rect x="128" y="396" width="232" height="80" rx="6" fill="#f5f5f5"/>
+      <rect x="128" y="396" width="232" height="80" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="136" y="404" width="44" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.50)" stroke-width="0.8"/>
+      <text x="158" y="413" fill="#4f5d75" font-size="7" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">DELEG</text>
+      <text x="244" y="436" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">PostgreSQL Flexible</text>
+      <text x="244" y="452" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">DBforPostgreSQL/flexibleServers</text>
+      <text x="244" y="466" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">VNet-injected · 10.20.3.x</text>
+
+      <!-- Node: Container Apps -->
+      <rect x="540" y="396" width="304" height="80" rx="6" fill="#f5f5f5"/>
+      <rect x="540" y="396" width="304" height="80" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="548" y="404" width="44" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="570" y="413" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">INFRA</text>
+      <text x="692" y="436" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Container Apps Env</text>
+      <text x="692" y="452" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">thumbnail worker</text>
+      <text x="692" y="466" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">infrastructure_subnet · /27 min</text>
+
+      <!-- Node: External PaaS cluster (outside VNet, below) -->
+      <rect x="620" y="620" width="320" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="620" y="620" width="320" height="64" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <rect x="628" y="628" width="40" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.22)" stroke-width="0.8"/>
+      <text x="648" y="637" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace"
+            text-anchor="middle" letter-spacing="0.08em">PAAS</text>
+      <text x="780" y="656" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Azure-managed services</text>
+      <text x="780" y="672" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Microsoft backbone  ·  không public IP</text>
+
+      <!-- ===== Legend ===== -->
+      <line x1="40" y1="700" x2="960" y2="700" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="40" y="714" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace"
+            letter-spacing="0.18em" display="none">LEGEND</text>
+
+      <!-- Legend items -->
+      <rect x="40" y="708" width="14" height="10" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="60" y="717" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Delegated subnet</text>
+
+      <rect x="200" y="708" width="14" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="220" y="717" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">VNet-resident</text>
+
+      <rect x="340" y="708" width="14" height="10" rx="2" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="360" y="717" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Bên ngoài VNet</text>
+
+      <line x1="488" y1="713" x2="516" y2="713" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <text x="524" y="717" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">HTTPS public</text>
+
+      <line x1="624" y1="713" x2="652" y2="713" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <text x="660" y="717" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Intra-VNet</text>
+
+      <line x1="744" y1="713" x2="772" y2="713" stroke="#eb6c36" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow-accent)"/>
+      <text x="780" y="717" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Private Link tunnel</text>
+    </svg>
+
+    <!-- ============ Explanation ============ -->
+
+    <h2>4 subnet, mỗi cái một bài toán</h2>
+
+    <table>
+      <thead>
+        <tr><th>Subnet</th><th>CIDR</th><th>Cơ chế gắn dịch vụ</th><th>Mục đích</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>snet-app</code></td>
+          <td><code>10.20.1.0/24</code></td>
+          <td>Delegation → <code>Microsoft.Web/serverFarms</code></td>
+          <td>App Service (NestJS) VNet-integrate vào đây. Outbound từ app đi qua subnet này → tới Postgres / PE.</td>
+        </tr>
+        <tr>
+          <td><code>snet-pe</code></td>
+          <td><code>10.20.2.0/24</code></td>
+          <td>Không delegate. Đặt <code>private_endpoint_network_policies = Disabled</code>.</td>
+          <td>Nơi gắn 5 Private Endpoint (NIC riêng) cho Storage, KeyVault, Cosmos, ACR, Postgres.</td>
+        </tr>
+        <tr>
+          <td><code>snet-db</code></td>
+          <td><code>10.20.3.0/24</code></td>
+          <td>Delegation → <code>Microsoft.DBforPostgreSQL/flexibleServers</code></td>
+          <td>Postgres Flexible Server VNet-injected — server "ở thật" trong subnet này.</td>
+        </tr>
+        <tr>
+          <td><code>snet-aca</code></td>
+          <td><code>10.20.4.0/27</code></td>
+          <td>Infrastructure subnet của Container Apps Environment.</td>
+          <td>Container Apps cần subnet riêng tối thiểu <code>/27</code> (32 IP) để chạy node infrastructure.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Delegation là gì?</h2>
+    <p>
+      Delegation = bạn <em>nhường quyền quản lý subnet</em> cho một Azure service cụ thể. Khi delegate subnet
+      cho <code>Microsoft.Web/serverFarms</code>, bạn cho phép App Service:
+    </p>
+    <ul>
+      <li>Tự inject các NIC ảo của plan App Service vào subnet (mỗi instance lấy 1 IP từ CIDR).</li>
+      <li>Tự cấu hình route table / NSG cần thiết cho service đó hoạt động.</li>
+      <li>Khoá subnet — không service khác delegate vào được, không VM nào tạo trong đó được.</li>
+    </ul>
+    <p>
+      <strong>Hệ quả:</strong> dịch vụ "chạy thật" bên trong VNet của bạn, lấy IP của bạn, traffic outbound đi qua route/NSG của bạn.
+      Phù hợp khi cần <em>compute</em> dùng VNet (App Service, Postgres Flexible, Container Apps, ACI, …).
+      Mỗi subnet chỉ delegate được cho 1 service — không thể delegate <code>snet-app</code> cho cả App Service và Postgres.
+    </p>
+
+    <h2>Private Endpoint là gì?</h2>
+    <p>
+      Private Endpoint (PE) là <strong>một NIC ảo trong subnet của bạn</strong> đại diện cho một resource
+      Azure PaaS đang chạy ở Microsoft backbone (không nằm trong VNet của bạn). Khi tạo PE cho Key Vault:
+    </p>
+    <ul>
+      <li>Azure cấp 1 NIC trong <code>snet-pe</code> với IP riêng (vd: <code>10.20.2.5</code>).</li>
+      <li>Key Vault thật ra vẫn ở backbone của Microsoft, nhưng có 1 "cửa ngách" Private Link mở vào NIC đó.</li>
+      <li>Bạn link Private DNS zone (<code>privatelink.vaultcore.azure.net</code>) để FQDN public của Key Vault resolve về IP private này.</li>
+      <li>Bạn có thể tắt public access trên Key Vault → resource chỉ có thể truy cập qua PE.</li>
+    </ul>
+    <p>
+      <strong>Hệ quả:</strong> dịch vụ vẫn là PaaS managed của Microsoft (auto patch, auto scale, không quản hạ tầng),
+      nhưng traffic <em>không bao giờ qua public Internet</em> — nó đi qua Private Link tunnel (mũi tên coral đứt nét).
+      Phù hợp khi cần <em>storage / secrets / DB managed</em> mà vẫn private (Storage, KeyVault, Cosmos, ACR, …).
+    </p>
+
+    <h2>Khi nào dùng cái nào?</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-dot coral"></span><h3>Delegation</h3></div>
+        <ul>
+          <li>Service "chạy" trong subnet, lấy IP của bạn.</li>
+          <li>Outbound traffic của service đi qua route/NSG của subnet đó.</li>
+          <li>Dùng cho compute: App Service VNet-integrate, Postgres Flexible, Container Apps, ACI.</li>
+          <li>1 subnet = 1 delegation duy nhất.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-dot ink"></span><h3>Private Endpoint</h3></div>
+        <ul>
+          <li>NIC trong subnet của bạn trỏ về resource ở Microsoft backbone.</li>
+          <li>Inbound từ VNet client tới resource đi private; resource có thể tắt public access.</li>
+          <li>Dùng cho storage/secrets/DB managed: Storage, KeyVault, Cosmos, ACR, Postgres (single-server).</li>
+          <li>Cần Private DNS zone link vào VNet để FQDN resolve về IP private.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>NSG đặt ở đâu?</h2>
+    <ul>
+      <li><code>nsg-app</code> gắn vào <code>snet-app</code>: cho phép inbound 443 từ service tag <code>ApiManagement</code> (vì APIM gọi vào App Service) và <code>AzureLoadBalancer</code>, deny mọi inbound còn lại từ Internet.</li>
+      <li><code>nsg-pe</code> gắn vào <code>snet-pe</code>: không cần custom rule. Default deny Internet inbound + allow VirtualNetwork là đủ — PE chỉ phục vụ traffic nội bộ VNet.</li>
+      <li><code>nsg-db</code> gắn vào <code>snet-db</code>: tương tự <code>nsg-pe</code> — chỉ traffic intra-VNet vào được port 5432.</li>
+    </ul>
+
+    <p class="colophon">Phase 7 · Lab 10 · Skill Challenge Platform · network-architecture</p>
+  </div>
+</body>
+</html>
