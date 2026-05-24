@@ -67,10 +67,10 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.5 Private DNS zones
 
-- [ ] 1.5.1 **(Portal)** Create one Private DNS Zone: `privatelink.postgres.database.azure.com`. Inside the zone → Virtual network links → Add → name `link-vnet-skillplatform-prod`, link to `vnet-skillplatform-prod`, **disable auto-registration**. **Screenshot.**
-- [ ] 1.5.2 Delete that Private DNS Zone (Terraform will recreate all five).
-- [ ] 1.5.3 **(Terraform)** In the network module, add five `azurerm_private_dns_zone` resources for `postgres`, `blob`, `vault`, `documents` (Cosmos), `azurecr`. Add a `for_each` `azurerm_private_dns_zone_virtual_network_link` linking each to the VNet, registration disabled.
-- [ ] 1.5.4 `terraform apply` and confirm all five zones appear in the RG.
+- [x] 1.5.1 **(Portal)** Create one Private DNS Zone: `privatelink.postgres.database.azure.com`. Inside the zone → Virtual network links → Add → name `link-vnet-skillplatform-prod`, link to `vnet-skillplatform-prod`, **disable auto-registration**. **Screenshot.**
+- [x] 1.5.2 Delete that Private DNS Zone (Terraform will recreate all five).
+- [x] 1.5.3 **(Terraform)** In the network module, add five `azurerm_private_dns_zone` resources for `postgres`, `blob`, `vault`, `documents` (Cosmos), `azurecr`. Add a `for_each` `azurerm_private_dns_zone_virtual_network_link` linking each to the VNet, registration disabled.
+- [x] 1.5.4 `terraform apply` and confirm all five zones appear in the RG.
 
 ### 1.6 Postgres Flexible Server (Day 5 — already touched in Phase 0, but on managed service now)
 

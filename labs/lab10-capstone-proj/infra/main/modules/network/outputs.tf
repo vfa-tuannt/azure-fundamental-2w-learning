@@ -37,3 +37,17 @@ output "nsg_pe_id" {
 output "nsg_db_id" {
   value = azurerm_network_security_group.db.id
 }
+
+output "private_dns_zone_ids" {
+  value = {
+    for k, z in azurerm_private_dns_zone.this : k => z.id
+  }
+  description = "Map of Private DNS zone IDs keyed by service (postgres, blob, vault, cosmos, acr)."
+}
+
+output "private_dns_zone_names" {
+  value = {
+    for k, z in azurerm_private_dns_zone.this : k => z.name
+  }
+  description = "Map of Private DNS zone FQDNs keyed by service."
+}

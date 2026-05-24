@@ -129,3 +129,41 @@ resource "azurerm_subnet_network_security_group_association" "db" {
   subnet_id                 = azurerm_subnet.db.id
   network_security_group_id = azurerm_network_security_group.db.id
 }
+
+############################################
+# Private DNS zones — one per service that uses a Private Endpoint
+#
+# Each zone is linked to the workload VNet so VNet clients resolve the
+# service's public FQDN to its private IP. Registration is disabled
+# because the Private Endpoints register A records themselves via
+# `private_dns_zone_group`.
+############################################
+
+locals {
+  private_dns_zone_names = {
+    postgres = "privatelink.postgres.database.azure.com"
+    blob     = "privatelink.blob.core.windows.net"
+    vault    = "privatelink.vaultcore.azure.net"
+    cosmos   = "privatelink.documents.azure.com"
+    acr      = "privatelink.azurecr.io"
+  }
+}
+
+resource "azurerm_private_dns_zone" "this" {
+  for_each = local.private_dns_zone_names
+
+  name                = each.value
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "this" {
+  for_each = azurerm_private_dns_zone.this
+
+  name                  = "link-${var.naming.vnet}"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = each.value.name
+  virtual_network_id    = azurerm_virtual_network.this.id
+  registration_enabled  = false
+  tags                  = var.tags
+}
