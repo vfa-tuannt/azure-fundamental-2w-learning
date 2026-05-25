@@ -29,6 +29,12 @@ variable "soft_delete_retention_days" {
   description = "Soft-delete retention window. Must be 7-90."
 }
 
+variable "allowed_admin_ips" {
+  type        = list(string)
+  default     = []
+  description = "Public IPs allowed to reach the vault data plane (for bootstrapping secrets from a developer laptop). Leave empty in production — secrets should then be written from a CI/CD runner that hits the Private Endpoint over VNet, or via Azure Cloud Shell + VNet integration."
+}
+
 variable "tags" {
   type    = map(string)
   default = {}

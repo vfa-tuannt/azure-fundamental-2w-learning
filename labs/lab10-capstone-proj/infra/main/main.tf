@@ -94,4 +94,6 @@ module "key_vault" {
 
   subnet_pe_id              = module.network.subnet_pe_id
   vault_private_dns_zone_id = module.network.private_dns_zone_ids["vault"]
+
+  allowed_admin_ips = var.allowed_admin_ips
 }

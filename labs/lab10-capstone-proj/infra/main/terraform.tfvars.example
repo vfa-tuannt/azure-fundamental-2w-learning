@@ -26,3 +26,8 @@ EOT
 alert_email          = "your-email@example.com"
 apim_publisher_email = "your-email@example.com"
 apim_publisher_name  = "Skillplatform Team"
+
+# Your laptop's public IP — needed to write Key Vault secrets from local
+# terraform apply. Find via:  curl https://api.ipify.org
+# Set to [] in production once secret bootstrap is done.
+allowed_admin_ips = ["203.0.113.42"]

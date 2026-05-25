@@ -52,3 +52,9 @@ variable "apim_publisher_name" {
   type        = string
   description = "Publisher display name required by the APIM resource."
 }
+
+variable "allowed_admin_ips" {
+  type        = list(string)
+  default     = []
+  description = "Public IPs allowed to reach Key Vault's data plane. Add your laptop's public IP here (`curl https://api.ipify.org`) so the initial `terraform apply` can write secrets. Set to [] once secret bootstrap is done."
+}

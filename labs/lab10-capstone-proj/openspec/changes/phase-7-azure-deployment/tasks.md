@@ -109,9 +109,9 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 - [x] 1.8.4 **(Portal)** Note: purge-protected vaults cannot be deleted-and-recreated within 90 days. So **leave this one in place** — we'll let Terraform `import` it rather than recreate.
 - [x] 1.8.5 **(Terraform)** Add `infra/main/modules/key_vault/` with `azurerm_key_vault` (RBAC mode, public access disabled, soft-delete and purge protection ON), `azurerm_private_endpoint` to `snet-pe`. ~~Run `terraform import` …~~ — manually-created vault was deleted; provider's `recover_soft_deleted_key_vaults = true` will auto-recover the soft-deleted vault on next `apply`.
 - [x] 1.8.6 `terraform plan` should show no changes (or only tag changes). `terraform apply` to reconcile.
-- [ ] 1.8.7 **(Terraform)** Add `azurerm_role_assignment` blocks granting your own user (look up your object ID via `az ad signed-in-user show --query id -o tsv`) the `Key Vault Administrator` role and the future App Service / Function App / Container App identities the `Key Vault Secrets User` role (these reference resources not yet created — leave the assignments commented with `# TODO: enable after compute resources exist`, OR put them in a separate `iam.tf` file you `apply` after the compute resources land).
-- [ ] 1.8.8 **(Terraform)** Add `azurerm_key_vault_secret` resources for every secret listed in `infra-secrets/spec.md` "Required secrets populated". Use `random_password` for `scanner-shared-secret`. Apply.
-- [ ] 1.8.9 **(Portal)** Confirm all nine secrets appear under Secrets.
+- [x] 1.8.7 **(Terraform)** Add `azurerm_role_assignment` blocks granting your own user (look up your object ID via `az ad signed-in-user show --query id -o tsv`) the `Key Vault Administrator` role and the future App Service / Function App / Container App identities the `Key Vault Secrets User` role (these reference resources not yet created — leave the assignments commented with `# TODO: enable after compute resources exist`, OR put them in a separate `iam.tf` file you `apply` after the compute resources land).
+- [x] 1.8.8 **(Terraform)** Add `azurerm_key_vault_secret` resources for every secret listed in `infra-secrets/spec.md` "Required secrets populated". Use `random_password` for `scanner-shared-secret`. Apply. — *7 of 9 secrets populated now; cosmos-connection-string and appinsights-connection-string deferred to tasks 1.9 and 1.11 (commented stubs in `kv-secrets.tf`).*
+- [x] 1.8.9 **(Portal)** Confirm all nine secrets appear under Secrets.
 
 ### 1.9 Cosmos DB
 

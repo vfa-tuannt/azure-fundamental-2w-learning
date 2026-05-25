@@ -21,8 +21,17 @@ resource "azurerm_key_vault" "this" {
   # RBAC mode (NOT legacy access policies).
   rbac_authorization_enabled = true
 
-  # Private-only.
-  public_network_access_enabled = false
+  # Selected-networks mode: the vault is reachable ONLY via the Private
+  # Endpoint and from the explicit IPs in `allowed_admin_ips`. The
+  # default action is Deny — everything not in the allowlist is
+  # blocked. Keep `allowed_admin_ips` empty in production.
+  public_network_access_enabled = true
+
+  network_acls {
+    bypass         = "AzureServices"
+    default_action = "Deny"
+    ip_rules       = var.allowed_admin_ips
+  }
 
   # Soft-delete + purge protection — per the proposal's security posture.
   soft_delete_retention_days = var.soft_delete_retention_days
