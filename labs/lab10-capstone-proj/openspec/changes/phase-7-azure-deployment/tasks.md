@@ -93,13 +93,13 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.7 Storage Account + containers
 
-- [ ] 1.7.1 **(Portal)** Create Storage Account `stskillplatformprod` (the convention is no hyphens for storage accounts — they're restricted to lowercase alphanumeric, ≤24 chars). Standard LRS, kind StorageV2, hierarchical namespace OFF.
-- [ ] 1.7.2 **(Portal)** Networking → "Disable public network access". Then add a Private Endpoint to `snet-pe` for the **blob** sub-resource. Confirm the matching Private DNS A record appears in `privatelink.blob.core.windows.net` zone.
-- [ ] 1.7.3 **(Portal)** Containers → create `submissions` (Private access) and `reports` (Private access). **Screenshot.**
-- [ ] 1.7.4 **(Portal)** Configuration → "Allow blob anonymous access" → Disabled. Apply.
-- [ ] 1.7.5 Delete the manually-created Storage Account.
-- [ ] 1.7.6 **(Terraform)** Add `infra/main/modules/storage/`: `azurerm_storage_account` (`public_network_access_enabled = false`, `allow_nested_items_to_be_public = false`), two `azurerm_storage_container`, a `azurerm_private_endpoint` to `snet-pe` for sub-resource `blob`, plus a `private_dns_zone_group` linking it to the `blob` Private DNS zone.
-- [ ] 1.7.7 `terraform apply` and confirm in the Portal.
+- [x] 1.7.1 **(Portal)** Create Storage Account `stskillplatformprod` (the convention is no hyphens for storage accounts — they're restricted to lowercase alphanumeric, ≤24 chars). Standard LRS, kind StorageV2, hierarchical namespace OFF.
+- [x] 1.7.2 **(Portal)** Networking → "Disable public network access". Then add a Private Endpoint to `snet-pe` for the **blob** sub-resource. Confirm the matching Private DNS A record appears in `privatelink.blob.core.windows.net` zone.
+- [x] 1.7.3 **(Portal)** Containers → create `submissions` (Private access) and `reports` (Private access). **Screenshot.**
+- [x] 1.7.4 **(Portal)** Configuration → "Allow blob anonymous access" → Disabled. Apply.
+- [x] 1.7.5 Delete the manually-created Storage Account.
+- [x] 1.7.6 **(Terraform)** Add `infra/main/modules/storage/`: `azurerm_storage_account` (`public_network_access_enabled = false`, `allow_nested_items_to_be_public = false`), two `azurerm_storage_container`, a `azurerm_private_endpoint` to `snet-pe` for sub-resource `blob`, plus a `private_dns_zone_group` linking it to the `blob` Private DNS zone.
+- [x] 1.7.7 `terraform apply` and confirm in the Portal.
 
 ### 1.8 Key Vault
 

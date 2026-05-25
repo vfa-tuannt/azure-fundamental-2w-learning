@@ -57,3 +57,19 @@ module "postgres" {
   delegated_subnet_id = module.network.subnet_db_id
   private_dns_zone_id = module.network.private_dns_zone_ids["postgres"]
 }
+
+############################################
+# Storage Account (private) + submissions/reports containers
+############################################
+
+module "storage" {
+  source = "./modules/storage"
+
+  location             = var.location
+  resource_group_name  = azurerm_resource_group.workload.name
+  storage_account_name = local.naming.storage
+  tags                 = local.tags
+
+  subnet_pe_id             = module.network.subnet_pe_id
+  blob_private_dns_zone_id = module.network.private_dns_zone_ids["blob"]
+}
