@@ -73,3 +73,25 @@ module "storage" {
   subnet_pe_id             = module.network.subnet_pe_id
   blob_private_dns_zone_id = module.network.private_dns_zone_ids["blob"]
 }
+
+############################################
+# Key Vault (RBAC mode, purge-protected, private-only)
+#
+# NOTE: a vault named `kv-skillplatform-prod` exists in soft-deleted state
+# from earlier portal work. `recover_soft_deleted_key_vaults = true` in
+# providers.tf causes this apply to recover the soft-deleted vault rather
+# than try to create a new one (which would 409 — the name is reserved
+# during the 90-day soft-delete window).
+############################################
+
+module "key_vault" {
+  source = "./modules/key_vault"
+
+  location            = var.location
+  resource_group_name = azurerm_resource_group.workload.name
+  vault_name          = local.naming.kv
+  tags                = local.tags
+
+  subnet_pe_id              = module.network.subnet_pe_id
+  vault_private_dns_zone_id = module.network.private_dns_zone_ids["vault"]
+}

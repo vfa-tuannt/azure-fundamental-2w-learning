@@ -103,12 +103,12 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.8 Key Vault
 
-- [ ] 1.8.1 **(Portal)** Create Key Vault `kv-skillplatform-prod`. Standard SKU, soft-delete enabled (90 days), purge protection ENABLED, **Permission model: Azure role-based access control**, Networking: Disable public access + Private Endpoint to `snet-pe` (sub-resource `vault`).
-- [ ] 1.8.2 **(Portal)** Confirm in Access control (IAM) that **no** access policies appear (RBAC mode). Grant yourself `Key Vault Administrator` role at the vault scope so the next step works.
-- [ ] 1.8.3 **(Portal)** Add one secret manually: name `database-url`, value `dummy`. Confirm it appears in Secrets. Delete it.
-- [ ] 1.8.4 **(Portal)** Note: purge-protected vaults cannot be deleted-and-recreated within 90 days. So **leave this one in place** — we'll let Terraform `import` it rather than recreate.
-- [ ] 1.8.5 **(Terraform)** Add `infra/main/modules/key_vault/` with `azurerm_key_vault` (RBAC mode, public access disabled, soft-delete and purge protection ON), `azurerm_private_endpoint` to `snet-pe`. Run `terraform import module.key_vault.azurerm_key_vault.this <vault-resource-id>` (find the resource ID in the Portal → Properties blade).
-- [ ] 1.8.6 `terraform plan` should show no changes (or only tag changes). `terraform apply` to reconcile.
+- [x] 1.8.1 **(Portal)** Create Key Vault `kv-skillplatform-prod`. Standard SKU, soft-delete enabled (90 days), purge protection ENABLED, **Permission model: Azure role-based access control**, Networking: Disable public access + Private Endpoint to `snet-pe` (sub-resource `vault`).
+- [x] 1.8.2 **(Portal)** Confirm in Access control (IAM) that **no** access policies appear (RBAC mode). Grant yourself `Key Vault Administrator` role at the vault scope so the next step works.
+- [x] 1.8.3 **(Portal)** Add one secret manually: name `database-url`, value `dummy`. Confirm it appears in Secrets. Delete it.
+- [x] 1.8.4 **(Portal)** Note: purge-protected vaults cannot be deleted-and-recreated within 90 days. So **leave this one in place** — we'll let Terraform `import` it rather than recreate.
+- [x] 1.8.5 **(Terraform)** Add `infra/main/modules/key_vault/` with `azurerm_key_vault` (RBAC mode, public access disabled, soft-delete and purge protection ON), `azurerm_private_endpoint` to `snet-pe`. ~~Run `terraform import` …~~ — manually-created vault was deleted; provider's `recover_soft_deleted_key_vaults = true` will auto-recover the soft-deleted vault on next `apply`.
+- [x] 1.8.6 `terraform plan` should show no changes (or only tag changes). `terraform apply` to reconcile.
 - [ ] 1.8.7 **(Terraform)** Add `azurerm_role_assignment` blocks granting your own user (look up your object ID via `az ad signed-in-user show --query id -o tsv`) the `Key Vault Administrator` role and the future App Service / Function App / Container App identities the `Key Vault Secrets User` role (these reference resources not yet created — leave the assignments commented with `# TODO: enable after compute resources exist`, OR put them in a separate `iam.tf` file you `apply` after the compute resources land).
 - [ ] 1.8.8 **(Terraform)** Add `azurerm_key_vault_secret` resources for every secret listed in `infra-secrets/spec.md` "Required secrets populated". Use `random_password` for `scanner-shared-secret`. Apply.
 - [ ] 1.8.9 **(Portal)** Confirm all nine secrets appear under Secrets.
