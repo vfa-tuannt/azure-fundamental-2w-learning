@@ -74,7 +74,7 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.6 Postgres Flexible Server (Day 5 — already touched in Phase 0, but on managed service now)
 
-- [ ] 1.6.1 **(Portal)** Create → "Azure Database for PostgreSQL flexible servers" → Flexible server. Wizard:
+- [x] 1.6.1 **(Portal)** Create → "Azure Database for PostgreSQL flexible servers" → Flexible server. Wizard:
   - Server name `psql-skillplatform-prod` (must be globally unique; if taken, append `-2`).
   - Region Japan East.
   - Postgres version 16.
@@ -84,12 +84,12 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
   - Admin user + password (write them down, you'll move to KV later).
   - Networking: **Private access (VNet integration)** → VNet `vnet-skillplatform-prod`, subnet `snet-db`, Private DNS `privatelink.postgres.database.azure.com` (created in 1.5).
   - Tags: standard set.
-- [ ] 1.6.2 Wait for provisioning (~10 min). **(Portal)** Confirm the Connect blade shows the private FQDN only, no public endpoint.
-- [ ] 1.6.3 **(Portal)** Create a database `skillplatform` under Databases tab.
-- [ ] 1.6.4 **(Portal)** Try to connect via Azure CLI Cloud Shell with `psql` — confirm it works only from inside the VNet (Cloud Shell will fail; that's expected).
-- [ ] 1.6.5 **(Portal)** Delete the manually-created server (DO NOT enable purge protection on this one).
-- [ ] 1.6.6 **(Terraform)** Create `infra/main/modules/postgres/` with `azurerm_postgresql_flexible_server` + `azurerm_postgresql_flexible_server_database "skillplatform"`. Wire admin password from the `pg_admin_password` variable. Configure `delegated_subnet_id = snet-db.id` and `private_dns_zone_id = postgres_dns_zone.id`.
-- [ ] 1.6.7 `terraform apply` and confirm the Portal shows the same server back, with the database `skillplatform` present.
+- [x] 1.6.2 Wait for provisioning (~10 min). **(Portal)** Confirm the Connect blade shows the private FQDN only, no public endpoint.
+- [x] 1.6.3 **(Portal)** Create a database `skillplatform` under Databases tab.
+- [x] 1.6.4 **(Portal)** Try to connect via Azure CLI Cloud Shell with `psql` — confirm it works only from inside the VNet (Cloud Shell will fail; that's expected).
+- [x] 1.6.5 **(Portal)** Delete the manually-created server (DO NOT enable purge protection on this one).
+- [x] 1.6.6 **(Terraform)** Create `infra/main/modules/postgres/` with `azurerm_postgresql_flexible_server` + `azurerm_postgresql_flexible_server_database "skillplatform"`. Wire admin password from the `pg_admin_password` variable. Configure `delegated_subnet_id = snet-db.id` and `private_dns_zone_id = postgres_dns_zone.id`.
+- [x] 1.6.7 `terraform apply` and confirm the Portal shows the same server back, with the database `skillplatform` present.
 
 ### 1.7 Storage Account + containers
 

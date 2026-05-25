@@ -38,3 +38,22 @@ module "network" {
     nsg_db   = local.naming.nsg_db
   }
 }
+
+############################################
+# Azure Database for PostgreSQL — Flexible Server (VNet-injected)
+############################################
+
+module "postgres" {
+  source = "./modules/postgres"
+
+  location            = var.location
+  resource_group_name = azurerm_resource_group.workload.name
+  server_name         = local.naming.psql
+  tags                = local.tags
+
+  admin_user     = var.pg_admin_user
+  admin_password = var.pg_admin_password
+
+  delegated_subnet_id = module.network.subnet_db_id
+  private_dns_zone_id = module.network.private_dns_zone_ids["postgres"]
+}
