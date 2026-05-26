@@ -22,14 +22,15 @@ resource "random_password" "scanner_shared_secret" {
 
 locals {
   kv_secrets = {
-    "database-url"                = module.postgres.database_url
-    "storage-connection-string"   = module.storage.primary_connection_string
-    "cosmos-connection-string"    = module.cosmos.primary_connection_string
-    "google-client-id"            = var.google_client_id
-    "google-client-secret"        = var.google_client_secret
-    "jwt-private-key"             = var.jwt_private_key
-    "jwt-public-key"              = var.jwt_public_key
-    "scanner-shared-secret"       = random_password.scanner_shared_secret.result
+    "database-url"                  = module.postgres.database_url
+    "storage-connection-string"     = module.storage.primary_connection_string
+    "cosmos-connection-string"      = module.cosmos.primary_connection_string
+    "appinsights-connection-string" = module.observability.appinsights_connection_string
+    "google-client-id"              = var.google_client_id
+    "google-client-secret"          = var.google_client_secret
+    "jwt-private-key"               = var.jwt_private_key
+    "jwt-public-key"                = var.jwt_public_key
+    "scanner-shared-secret"         = random_password.scanner_shared_secret.result
   }
 }
 
@@ -46,7 +47,7 @@ resource "azurerm_key_vault_secret" "this" {
 }
 
 ############################################
-# TODO: enable after Application Insights module exists (section 1.11)
+# All 9 spec'd secrets are now populated.
 ############################################
 
 # resource "azurerm_key_vault_secret" "appinsights_connection_string" {

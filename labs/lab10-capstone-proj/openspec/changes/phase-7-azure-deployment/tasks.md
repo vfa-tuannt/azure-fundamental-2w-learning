@@ -133,12 +133,12 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.11 Application Insights + Log Analytics
 
-- [ ] 1.11.1 **(Portal)** Create Log Analytics workspace `log-skillplatform-prod` (Per-GB pricing). Set Usage and estimated costs → Daily cap → 1 GB → Apply.
-- [ ] 1.11.2 **(Portal)** Create Application Insights `appi-skillplatform-prod`, attach to the workspace just created (Workspace-based).
-- [ ] 1.11.3 **(Portal)** Copy the App Insights Connection string from Overview. Confirm format `InstrumentationKey=...;IngestionEndpoint=...`.
-- [ ] 1.11.4 Delete both.
-- [ ] 1.11.5 **(Terraform)** Add `infra/main/modules/observability/` with `azurerm_log_analytics_workspace` (`daily_quota_gb = 1`), `azurerm_application_insights` (`workspace_id = log_analytics.id`). Save the connection string to Key Vault as the `appinsights-connection-string` secret.
-- [ ] 1.11.6 `terraform apply`.
+- [x] 1.11.1 **(Portal)** Create Log Analytics workspace `log-skillplatform-prod` (Per-GB pricing). Set Usage and estimated costs → Daily cap → 1 GB → Apply.
+- [x] 1.11.2 **(Portal)** Create Application Insights `appi-skillplatform-prod`, attach to the workspace just created (Workspace-based).
+- [x] 1.11.3 **(Portal)** Copy the App Insights Connection string from Overview. Confirm format `InstrumentationKey=...;IngestionEndpoint=...`.
+- [x] 1.11.4 Delete both.
+- [x] 1.11.5 **(Terraform)** Add `infra/main/modules/observability/` with `azurerm_log_analytics_workspace` (`daily_quota_gb = 1`), `azurerm_application_insights` (`workspace_id = log_analytics.id`). Save the connection string to Key Vault as the `appinsights-connection-string` secret.
+- [x] 1.11.6 `terraform apply`.
 
 ### 1.12 Subscription Budget alert
 

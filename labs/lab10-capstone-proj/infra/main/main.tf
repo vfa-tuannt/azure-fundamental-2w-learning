@@ -133,3 +133,18 @@ module "acr" {
   subnet_pe_id            = module.network.subnet_pe_id
   acr_private_dns_zone_id = module.network.private_dns_zone_ids["acr"]
 }
+
+############################################
+# Observability — Log Analytics workspace + Application Insights
+############################################
+
+module "observability" {
+  source = "./modules/observability"
+
+  location            = var.location
+  resource_group_name = azurerm_resource_group.workload.name
+  tags                = local.tags
+
+  log_analytics_workspace_name = local.naming.log
+  appinsights_name             = local.naming.appi
+}
