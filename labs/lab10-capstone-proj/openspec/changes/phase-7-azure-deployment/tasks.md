@@ -142,15 +142,15 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.12 Subscription Budget alert
 
-- [ ] 1.12.1 **(Portal)** Cost Management + Billing → Budgets → Add budget `budget-skillplatform-monthly`, monthly amount `32`, alert thresholds 80% and 100%, contact email = your email.
-- [ ] 1.12.2 **(Terraform)** Reproduce via `azurerm_consumption_budget_subscription`. Apply.
+- [x] 1.12.1 **(Portal)** Cost Management + Billing → Budgets → Add budget `budget-skillplatform-monthly`, monthly amount `32`, alert thresholds 80% and 100%, contact email = your email.
+- [x] 1.12.2 **(Terraform)** Reproduce via `azurerm_consumption_budget_subscription`. Apply.
 
 ### 1.13 Demo checkpoint 7a
 
-- [ ] 1.13.1 `terraform plan` is clean (zero changes).
-- [ ] 1.13.2 `terraform destroy` + `terraform apply` rebuilds the whole stack in under 30 minutes (note: Key Vault may take longer due to purge protection — use a separate state slice if needed).
-- [ ] 1.13.3 **(Portal)** Visit RG `rg-skillplatform-prod` Overview. Resource count ≥ 20. **Screenshot** the resource list — this is your "before code" milestone.
-- [ ] 1.13.4 Open at least three private endpoints' Networking blade and verify each shows "Approved" connection state with a private IP in `10.20.2.0/24`.
+- [x] 1.13.1 `terraform plan` is clean (zero changes).
+- [x] 1.13.2 `terraform destroy` + `terraform apply` rebuilds the whole stack in under 30 minutes (note: Key Vault may take longer due to purge protection — use a separate state slice if needed).
+- [x] 1.13.3 **(Portal)** Visit RG `rg-skillplatform-prod` Overview. Resource count ≥ 20. **Screenshot** the resource list — this is your "before code" milestone.
+- [x] 1.13.4 Open at least three private endpoints' Networking blade and verify each shows "Approved" connection state with a private IP in `10.20.2.0/24`.
 
 ---
 
