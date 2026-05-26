@@ -126,10 +126,10 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.10 Azure Container Registry
 
-- [ ] 1.10.1 **(Portal)** Create ACR `acrskillplatformprod` (Basic SKU, admin user OFF, public network access Disabled, Private Endpoint to `snet-pe`).
-- [ ] 1.10.2 Delete it.
-- [ ] 1.10.3 **(Terraform)** Add `infra/main/modules/acr/` with `azurerm_container_registry` (`sku = "Basic"`, `admin_enabled = false`, `public_network_access_enabled = false`) + Private Endpoint.
-- [ ] 1.10.4 `terraform apply`.
+- [x] 1.10.1 **(Portal)** Create ACR `acrskillplatformprod` (Basic SKU, admin user OFF, public network access Disabled, Private Endpoint to `snet-pe`).
+- [x] 1.10.2 Delete it.
+- [x] 1.10.3 **(Terraform)** Add `infra/main/modules/acr/` with `azurerm_container_registry` (~~`sku = "Basic"`~~ **upgraded to `Premium`** — Basic does not support Private Endpoints, `admin_enabled = false`, `public_network_access_enabled = false`) + Private Endpoint. *Spec deviation: Premium SKU (~$50/mo) busts the $40 monthly budget; update the budget alert in section 1.12 accordingly.*
+- [x] 1.10.4 `terraform apply`.
 
 ### 1.11 Application Insights + Log Analytics
 

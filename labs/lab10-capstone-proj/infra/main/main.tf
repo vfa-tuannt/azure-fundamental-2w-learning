@@ -113,3 +113,23 @@ module "cosmos" {
   subnet_pe_id               = module.network.subnet_pe_id
   cosmos_private_dns_zone_id = module.network.private_dns_zone_ids["cosmos"]
 }
+
+############################################
+# Azure Container Registry (Premium, private)
+#
+# NOTE: Premium SKU (~$50/mo) is required for Private Endpoints. This
+# pushes total monthly cost above the original $40 budget — adjust the
+# subscription budget alert if you want to keep alerts meaningful.
+############################################
+
+module "acr" {
+  source = "./modules/acr"
+
+  location            = var.location
+  resource_group_name = azurerm_resource_group.workload.name
+  registry_name       = local.naming.acr
+  tags                = local.tags
+
+  subnet_pe_id            = module.network.subnet_pe_id
+  acr_private_dns_zone_id = module.network.private_dns_zone_ids["acr"]
+}
