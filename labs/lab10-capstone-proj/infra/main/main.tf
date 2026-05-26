@@ -97,3 +97,19 @@ module "key_vault" {
 
   allowed_admin_ips = var.allowed_admin_ips
 }
+
+############################################
+# Cosmos DB (Serverless, SQL API) — activity + submission events
+############################################
+
+module "cosmos" {
+  source = "./modules/cosmos"
+
+  location            = var.location
+  resource_group_name = azurerm_resource_group.workload.name
+  account_name        = local.naming.cosmos
+  tags                = local.tags
+
+  subnet_pe_id               = module.network.subnet_pe_id
+  cosmos_private_dns_zone_id = module.network.private_dns_zone_ids["cosmos"]
+}

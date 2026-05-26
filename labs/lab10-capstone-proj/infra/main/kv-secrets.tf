@@ -24,6 +24,7 @@ locals {
   kv_secrets = {
     "database-url"                = module.postgres.database_url
     "storage-connection-string"   = module.storage.primary_connection_string
+    "cosmos-connection-string"    = module.cosmos.primary_connection_string
     "google-client-id"            = var.google_client_id
     "google-client-secret"        = var.google_client_secret
     "jwt-private-key"             = var.jwt_private_key
@@ -43,18 +44,6 @@ resource "azurerm_key_vault_secret" "this" {
     azurerm_role_assignment.deployer_kv_admin,
   ]
 }
-
-############################################
-# TODO: enable after Cosmos DB module exists (section 1.9)
-############################################
-
-# resource "azurerm_key_vault_secret" "cosmos_connection_string" {
-#   name         = "cosmos-connection-string"
-#   value        = module.cosmos.primary_connection_string
-#   key_vault_id = module.key_vault.vault_id
-#
-#   depends_on = [azurerm_role_assignment.deployer_kv_admin]
-# }
 
 ############################################
 # TODO: enable after Application Insights module exists (section 1.11)

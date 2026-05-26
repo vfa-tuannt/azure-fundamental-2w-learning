@@ -115,14 +115,14 @@ Goal: from zero, have an empty Resource Group + VNet + every backing data servic
 
 ### 1.9 Cosmos DB
 
-- [ ] 1.9.1 **(Portal)** Create Cosmos DB → Azure Cosmos DB for NoSQL → Capacity mode Serverless → name `cosmos-skillplatform-prod`. Networking: disable public access, Private Endpoint to `snet-pe` (sub-resource `Sql`).
-- [ ] 1.9.2 **(Portal)** Open Data Explorer → New Database `skillplatform` (no shared throughput; Serverless allocates per container). Then add containers:
+- [x] 1.9.1 **(Portal)** Create Cosmos DB → Azure Cosmos DB for NoSQL → Capacity mode Serverless → name `cosmos-skillplatform-prod`. Networking: disable public access, Private Endpoint to `snet-pe` (sub-resource `Sql`).
+- [x] 1.9.2 **(Portal)** Open Data Explorer → New Database `skillplatform` (no shared throughput; Serverless allocates per container). Then add containers:
   - `activity_events` PK `/userId`.
   - `submission_events` PK `/submissionId`.
-- [ ] 1.9.3 **(Portal)** Edit `activity_events` Indexing Policy → add composite index `[ /userId ASC, /createdAt DESC ]`. Save.
-- [ ] 1.9.4 Delete the manually-created Cosmos account.
-- [ ] 1.9.5 **(Terraform)** Add `infra/main/modules/cosmos/` with `azurerm_cosmosdb_account` (capabilities `EnableServerless`, public_network_access_enabled false), `azurerm_cosmosdb_sql_database "skillplatform"`, two `azurerm_cosmosdb_sql_container` (with the composite index for the first), and the Private Endpoint + DNS zone group.
-- [ ] 1.9.6 `terraform apply` and confirm in the Data Explorer.
+- [x] 1.9.3 **(Portal)** Edit `activity_events` Indexing Policy → add composite index `[ /userId ASC, /createdAt DESC ]`. Save.
+- [x] 1.9.4 Delete the manually-created Cosmos account.
+- [x] 1.9.5 **(Terraform)** Add `infra/main/modules/cosmos/` with `azurerm_cosmosdb_account` (capabilities `EnableServerless`, public_network_access_enabled false), `azurerm_cosmosdb_sql_database "skillplatform"`, two `azurerm_cosmosdb_sql_container` (with the composite index for the first), and the Private Endpoint + DNS zone group. Also uncommented `cosmos-connection-string` in `kv-secrets.tf`.
+- [x] 1.9.6 `terraform apply` and confirm in the Data Explorer.
 
 ### 1.10 Azure Container Registry
 
