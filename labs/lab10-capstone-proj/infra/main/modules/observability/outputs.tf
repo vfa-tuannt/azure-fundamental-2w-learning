@@ -21,7 +21,7 @@ output "appinsights_connection_string" {
 }
 
 output "appinsights_instrumentation_key" {
-  value     = azurerm_application_insights.this.instrumentation_key
-  sensitive = true
+  value       = azurerm_application_insights.this.instrumentation_key
+  sensitive   = true
   description = "Legacy instrumentation key. Modern SDKs should prefer the connection string."
 }

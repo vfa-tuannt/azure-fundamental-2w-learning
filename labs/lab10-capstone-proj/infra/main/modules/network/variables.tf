@@ -39,7 +39,7 @@ variable "subnet_prefixes" {
     app = "10.20.1.0/24"
     pe  = "10.20.2.0/24"
     db  = "10.20.3.0/24"
-    aca = "10.20.4.0/27"  # ACA requires /27 minimum
+    aca = "10.20.4.0/27" # ACA requires /27 minimum
   }
 }
 

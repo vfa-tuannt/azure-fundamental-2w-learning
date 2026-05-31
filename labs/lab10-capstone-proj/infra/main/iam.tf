@@ -21,20 +21,50 @@ resource "azurerm_role_assignment" "deployer_kv_admin" {
 }
 
 ############################################
-# TODO: enable after compute resources exist (sections 2.1, 3.1, 3.4)
+# App Service (NestJS) — managed-identity grants
 #
-# Each compute resource gets a system-assigned managed identity that
-# needs `Key Vault Secrets User` on the vault to resolve the
-# `@Microsoft.KeyVault(SecretUri=...)` app-setting references.
-#
-# Un-comment each block when the matching module is wired in:
+# - Key Vault Secrets User: required so the @Microsoft.KeyVault(...) app
+#   settings resolve at runtime. After the first apply the App Service
+#   must be restarted once for the references to flip from "unresolved"
+#   to green (task 2.1.9).
+# - Storage Blob Data Contributor: required for the submissions/reports
+#   container access from NestJS (SAS issuance and direct blob ops).
+# - Cosmos DB Built-in Data Contributor (data-plane): required to
+#   read/write activity_events and submission_events. This is a Cosmos
+#   data-plane role, so it is assigned via azurerm_cosmosdb_sql_role_-
+#   assignment, NOT azurerm_role_assignment. The built-in role
+#   definition GUID `00000000-0000-0000-0000-000000000002` is fixed by
+#   Azure across every account.
 ############################################
 
-# resource "azurerm_role_assignment" "app_service_kv_secrets_user" {
-#   scope                = module.key_vault.vault_id
-#   role_definition_name = "Key Vault Secrets User"
-#   principal_id         = module.app_service.principal_id
-# }
+resource "azurerm_role_assignment" "app_service_kv_secrets_user" {
+  scope                = module.key_vault.vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.app_service.principal_id
+
+  description = "Allows the NestJS App Service MI to resolve @Microsoft.KeyVault(...) app-setting references at runtime."
+}
+
+resource "azurerm_role_assignment" "app_service_storage_blob_data_contributor" {
+  scope                = module.storage.storage_account_id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = module.app_service.principal_id
+
+  description = "Allows the NestJS App Service MI to read/write blobs in the submissions and reports containers."
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "app_service_cosmos_data_contributor" {
+  resource_group_name = azurerm_resource_group.workload.name
+  account_name        = module.cosmos.account_name
+  scope               = module.cosmos.account_id
+  role_definition_id  = "${module.cosmos.account_id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  principal_id        = module.app_service.principal_id
+}
+
+############################################
+# TODO: enable after the remaining compute resources exist (sections
+# 3.1, 3.4). Both will follow the same KV-Secrets-User pattern:
+############################################
 
 # resource "azurerm_role_assignment" "function_app_kv_secrets_user" {
 #   scope                = module.key_vault.vault_id

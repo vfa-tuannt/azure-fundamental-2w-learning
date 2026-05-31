@@ -58,3 +58,15 @@ variable "allowed_admin_ips" {
   default     = []
   description = "Public IPs allowed to reach Key Vault's data plane. Add your laptop's public IP here (`curl https://api.ipify.org`) so the initial `terraform apply` can write secrets. Set to [] once secret bootstrap is done."
 }
+
+variable "cors_origin" {
+  type        = string
+  default     = "https://placeholder.azurestaticapps.net"
+  description = "Allowed CORS origin for the NestJS API. Defaults to a placeholder; update to the Static Web App default hostname once task 2.5 has provisioned it."
+}
+
+variable "thumbnail_service_url" {
+  type        = string
+  default     = "https://placeholder.internal.azurecontainerapps.io"
+  description = "Internal URL of the thumbnail Container App (Phase 7c). Defaults to a placeholder; update after the Container App is provisioned."
+}

@@ -148,3 +148,24 @@ module "observability" {
   log_analytics_workspace_name = local.naming.log
   appinsights_name             = local.naming.appi
 }
+
+############################################
+# App Service Plan + Linux Web App for the NestJS backend
+############################################
+
+module "app_service" {
+  source = "./modules/app_service"
+
+  location            = var.location
+  resource_group_name = azurerm_resource_group.workload.name
+  tags                = local.tags
+
+  plan_name = local.naming.plan
+  app_name  = local.naming.app
+
+  subnet_id     = module.network.subnet_app_id
+  key_vault_uri = module.key_vault.vault_uri
+
+  cors_origin           = var.cors_origin
+  thumbnail_service_url = var.thumbnail_service_url
+}

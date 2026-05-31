@@ -160,15 +160,15 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 
 ### 2.1 App Service Plan + App Service
 
-- [ ] 2.1.1 **(Portal)** Create App Service Plan `plan-skillplatform-prod`, Linux, B1, region Japan East. Then App Service `app-skillplatform-prod` on it, runtime Node 24 LTS, region same as plan.
-- [ ] 2.1.2 **(Portal)** App Service → Identity → System assigned → On → Save. Note the **Object (principal) ID**.
-- [ ] 2.1.3 **(Portal)** Networking → VNet integration → Add VNet integration → Region match, VNet `vnet-skillplatform-prod`, subnet `snet-app`. Confirm "Outbound traffic routed through VNet" is ON.
-- [ ] 2.1.4 **(Portal)** Health check → enable, path `/health`, 2 min window.
-- [ ] 2.1.5 Delete both.
-- [ ] 2.1.6 **(Terraform)** Add `infra/main/modules/app_service/` with `azurerm_service_plan` (`sku_name = "B1"`, `os_type = "Linux"`) and `azurerm_linux_web_app` (`site_config.application_stack.node_version = "24-lts"`, `identity.type = "SystemAssigned"`, `virtual_network_subnet_id = snet_app.id`, `site_config.health_check_path = "/health"`).
-- [ ] 2.1.7 **(Terraform)** Configure `app_settings` per [infra-app-service](specs/infra-app-service/spec.md): eight Key Vault references plus `NODE_ENV=production`, `PORT=8080`, `CORS_ORIGIN`, `THUMBNAIL_SERVICE_URL` (set placeholder; will update after Phase 7c).
-- [ ] 2.1.8 **(Terraform)** Grant the App Service MI `Key Vault Secrets User`, `Storage Blob Data Contributor`, and `Cosmos DB Built-in Data Contributor` (the Cosmos role is a data-plane role; use `azapi_resource` or `az rest` post-apply if `azurerm` lacks coverage).
-- [ ] 2.1.9 `terraform apply`. Restart the App Service in the Portal; confirm all eight Key Vault references show green checkmarks under Environment Variables.
+- [x] 2.1.1 **(Portal)** Create App Service Plan `plan-skillplatform-prod`, Linux, B1, region Japan East. Then App Service `app-skillplatform-prod` on it, runtime Node 24 LTS, region same as plan.
+- [x] 2.1.2 **(Portal)** App Service → Identity → System assigned → On → Save. Note the **Object (principal) ID**.
+- [x] 2.1.3 **(Portal)** Networking → VNet integration → Add VNet integration → Region match, VNet `vnet-skillplatform-prod`, subnet `snet-app`. Confirm "Outbound traffic routed through VNet" is ON.
+- [x] 2.1.4 **(Portal)** Health check → enable, path `/health`, 2 min window.
+- [x] 2.1.5 Delete both.
+- [x] 2.1.6 **(Terraform)** Add `infra/main/modules/app_service/` with `azurerm_service_plan` (`sku_name = "B1"`, `os_type = "Linux"`) and `azurerm_linux_web_app` (`site_config.application_stack.node_version = "24-lts"`, `identity.type = "SystemAssigned"`, `virtual_network_subnet_id = snet_app.id`, `site_config.health_check_path = "/health"`).
+- [x] 2.1.7 **(Terraform)** Configure `app_settings` per [infra-app-service](specs/infra-app-service/spec.md): eight Key Vault references plus `NODE_ENV=production`, `PORT=8080`, `CORS_ORIGIN`, `THUMBNAIL_SERVICE_URL` (set placeholder; will update after Phase 7c).
+- [x] 2.1.8 **(Terraform)** Grant the App Service MI `Key Vault Secrets User`, `Storage Blob Data Contributor`, and `Cosmos DB Built-in Data Contributor` (the Cosmos role is a data-plane role; use `azapi_resource` or `az rest` post-apply if `azurerm` lacks coverage).
+- [x] 2.1.9 `terraform apply`. Restart the App Service in the Portal; confirm all eight Key Vault references show green checkmarks under Environment Variables.
 
 ### 2.2 NestJS code changes for Azure
 

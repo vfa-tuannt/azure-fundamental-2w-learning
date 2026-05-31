@@ -12,8 +12,8 @@ output "endpoint" {
 }
 
 output "primary_connection_string" {
-  value     = format("AccountEndpoint=%s;AccountKey=%s;", azurerm_cosmosdb_account.this.endpoint, azurerm_cosmosdb_account.this.primary_key)
-  sensitive = true
+  value       = format("AccountEndpoint=%s;AccountKey=%s;", azurerm_cosmosdb_account.this.endpoint, azurerm_cosmosdb_account.this.primary_key)
+  sensitive   = true
   description = "SQL API primary connection string. Will be written to Key Vault as `cosmos-connection-string` in task 1.8.8 (now uncommented)."
 }
 
