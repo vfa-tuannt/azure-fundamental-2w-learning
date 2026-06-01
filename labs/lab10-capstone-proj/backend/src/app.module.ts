@@ -16,10 +16,12 @@ import { SubmissionsModule } from './submissions/submissions.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { ActivityModule } from './activity/activity.module';
 import { ActivityEvent } from './activity/activity-event.entity';
+import { TelemetryModule } from './telemetry/telemetry.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    TelemetryModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

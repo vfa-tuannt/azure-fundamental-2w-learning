@@ -11,6 +11,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { ActivityEventType } from '../activity/activity-event-type.enum';
 import { ActivityService } from '../activity/activity.service';
+import { TelemetryService } from '../telemetry/telemetry.service';
 import { Challenge } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from '../enrollments/enrollment-status.enum';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -61,6 +62,7 @@ export class SubmissionsService {
     private readonly dataSource: DataSource,
     private readonly blobStorage: AzureBlobStorageService,
     private readonly activity: ActivityService,
+    private readonly telemetry: TelemetryService,
   ) {}
 
   validateFile(file: Express.Multer.File): void {
@@ -144,6 +146,14 @@ export class SubmissionsService {
         kind: 'file',
       },
     });
+    this.telemetry.trackEvent('submission.created', {
+      userId,
+      submissionId: saved.id,
+      enrollmentId,
+      challengeId: challenge.id,
+      challengeTitle: challenge.title,
+      kind: 'file',
+    });
     return saved;
   }
 
@@ -183,6 +193,14 @@ export class SubmissionsService {
         challengeTitle: challenge.title,
         kind: 'url',
       },
+    });
+    this.telemetry.trackEvent('submission.created', {
+      userId,
+      submissionId: saved.id,
+      enrollmentId,
+      challengeId: challenge.id,
+      challengeTitle: challenge.title,
+      kind: 'url',
     });
     return saved;
   }

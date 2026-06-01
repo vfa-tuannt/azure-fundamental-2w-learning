@@ -172,12 +172,12 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 
 ### 2.2 NestJS code changes for Azure
 
-- [ ] 2.2.1 Audit `backend/src/main.ts` and confirm `process.env.PORT`, `process.env.CORS_ORIGIN`, `process.env.DATABASE_URL` are all already read (they are, per CLAUDE.md). If anything is hard-coded for local dev, gate it on `NODE_ENV !== 'production'`.
-- [ ] 2.2.2 Add `applicationinsights` to `backend/package.json`: `yarn add applicationinsights`. Initialise in `main.ts` BEFORE any other import: `const ai = require('applicationinsights'); ai.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING).setAutoCollectConsole(true, true).setAutoCollectExceptions(true).setAutoCollectRequests(true).setAutoCollectDependencies(true).setDistributedTracingMode(ai.DistributedTracingModes.AI_AND_W3C).setSendLiveMetrics(false).start();` Gate on `process.env.APPLICATIONINSIGHTS_CONNECTION_STRING` being set so local dev still boots.
-- [ ] 2.2.3 Set `cloudRole` to `"skillplatform-api"`: `ai.defaultClient.context.tags[ai.defaultClient.context.keys.cloudRole] = "skillplatform-api"`.
-- [ ] 2.2.4 Add a tiny `TelemetryService` in `backend/src/telemetry/telemetry.service.ts` exposing `trackEvent(name, props?)`. The existing Phase-6 hooks (`challenge.created`, etc.) call `telemetry.trackEvent('challenge.created', { challengeId })`.
-- [ ] 2.2.5 In each domain service that already calls `ActivityService.record`, add a sibling `telemetry.trackEvent(...)` call with the same event name (mirror the activity event types but in dot-case).
-- [ ] 2.2.6 `yarn test && yarn lint && yarn tsc --noEmit` — all clean.
+- [x] 2.2.1 Audit `backend/src/main.ts` and confirm `process.env.PORT`, `process.env.CORS_ORIGIN`, `process.env.DATABASE_URL` are all already read (they are, per CLAUDE.md). If anything is hard-coded for local dev, gate it on `NODE_ENV !== 'production'`.
+- [x] 2.2.2 Add `applicationinsights` to `backend/package.json`: `yarn add applicationinsights`. Initialise in `main.ts` BEFORE any other import: `const ai = require('applicationinsights'); ai.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING).setAutoCollectConsole(true, true).setAutoCollectExceptions(true).setAutoCollectRequests(true).setAutoCollectDependencies(true).setDistributedTracingMode(ai.DistributedTracingModes.AI_AND_W3C).setSendLiveMetrics(false).start();` Gate on `process.env.APPLICATIONINSIGHTS_CONNECTION_STRING` being set so local dev still boots.
+- [x] 2.2.3 Set `cloudRole` to `"skillplatform-api"`: `ai.defaultClient.context.tags[ai.defaultClient.context.keys.cloudRole] = "skillplatform-api"`.
+- [x] 2.2.4 Add a tiny `TelemetryService` in `backend/src/telemetry/telemetry.service.ts` exposing `trackEvent(name, props?)`. The existing Phase-6 hooks (`challenge.created`, etc.) call `telemetry.trackEvent('challenge.created', { challengeId })`.
+- [x] 2.2.5 In each domain service that already calls `ActivityService.record`, add a sibling `telemetry.trackEvent(...)` call with the same event name (mirror the activity event types but in dot-case).
+- [x] 2.2.6 `yarn test && yarn lint && yarn tsc --noEmit` — all clean.
 
 ### 2.3 First-time deploy of NestJS
 

@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ActivityEventType } from '../activity/activity-event-type.enum';
 import { ActivityService } from '../activity/activity.service';
+import { TelemetryService } from '../telemetry/telemetry.service';
 import { Challenge, ChallengeStatus } from './challenge.entity';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
@@ -23,6 +24,7 @@ export class ChallengesService {
     @InjectRepository(Challenge)
     private readonly challenges: Repository<Challenge>,
     private readonly activity: ActivityService,
+    private readonly telemetry: TelemetryService,
   ) {}
 
   async create(
@@ -43,6 +45,11 @@ export class ChallengesService {
       userId: ownerId,
       type: ActivityEventType.CHALLENGE_CREATED,
       payload: { challengeId: saved.id, challengeTitle: saved.title },
+    });
+    this.telemetry.trackEvent('challenge.created', {
+      userId: ownerId,
+      challengeId: saved.id,
+      challengeTitle: saved.title,
     });
     return this.toDto(saved, 0);
   }

@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ActivityEventType } from '../activity/activity-event-type.enum';
 import { ActivityService } from '../activity/activity.service';
+import { TelemetryService } from '../telemetry/telemetry.service';
 import { Challenge, ChallengeStatus } from './challenge.entity';
 import { ChallengesService } from './challenges.service';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
@@ -105,6 +106,7 @@ describe('ChallengesService', () => {
         ChallengesService,
         { provide: getRepositoryToken(Challenge), useValue: repoMock },
         { provide: ActivityService, useValue: { record: activityRecord } },
+        { provide: TelemetryService, useValue: { trackEvent: jest.fn() } },
       ],
     }).compile();
 

@@ -8,6 +8,7 @@ import { getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { ActivityEventType } from '../activity/activity-event-type.enum';
 import { ActivityService } from '../activity/activity.service';
+import { TelemetryService } from '../telemetry/telemetry.service';
 import { Challenge, ChallengeStatus } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from './enrollment-status.enum';
 import { Enrollment } from './enrollment.entity';
@@ -137,6 +138,7 @@ describe('EnrollmentsService', () => {
         },
         { provide: getDataSourceToken(), useValue: buildDataSource(tx) },
         { provide: ActivityService, useValue: { record: activityRecord } },
+        { provide: TelemetryService, useValue: { trackEvent: jest.fn() } },
       ],
     }).compile();
 

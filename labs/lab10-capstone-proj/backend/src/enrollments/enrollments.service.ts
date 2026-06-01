@@ -8,6 +8,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { ActivityEventType } from '../activity/activity-event-type.enum';
 import { ActivityService } from '../activity/activity.service';
+import { TelemetryService } from '../telemetry/telemetry.service';
 import { Challenge, ChallengeStatus } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from './enrollment-status.enum';
 import { Enrollment } from './enrollment.entity';
@@ -26,6 +27,7 @@ export class EnrollmentsService {
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly activity: ActivityService,
+    private readonly telemetry: TelemetryService,
   ) {}
 
   async enroll(challengeId: string, userId: string): Promise<EnrollmentDto> {
@@ -107,6 +109,12 @@ export class EnrollmentsService {
         challengeTitle,
         enrollmentId: dto.id,
       },
+    });
+    this.telemetry.trackEvent('enrollment.created', {
+      userId,
+      challengeId,
+      challengeTitle,
+      enrollmentId: dto.id,
     });
     return dto;
   }

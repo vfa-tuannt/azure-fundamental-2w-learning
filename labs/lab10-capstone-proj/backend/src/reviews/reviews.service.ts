@@ -8,6 +8,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, Repository } from 'typeorm';
 import { ActivityEventType } from '../activity/activity-event-type.enum';
 import { ActivityService } from '../activity/activity.service';
+import { TelemetryService } from '../telemetry/telemetry.service';
 import { Challenge } from '../challenges/challenge.entity';
 import { EnrollmentStatus } from '../enrollments/enrollment-status.enum';
 import { Enrollment } from '../enrollments/enrollment.entity';
@@ -36,6 +37,7 @@ export class ReviewsService {
     private readonly dataSource: DataSource,
     private readonly submissionsService: SubmissionsService,
     private readonly activity: ActivityService,
+    private readonly telemetry: TelemetryService,
   ) {}
 
   async approve(
@@ -207,6 +209,14 @@ export class ReviewsService {
           reviewerId: callerUserId,
         },
       });
+      this.telemetry.trackEvent('submission.approved', {
+        userId: enrollment.userId,
+        submissionId: result.id,
+        enrollmentId: enrollment.id,
+        challengeId: challenge.id,
+        challengeTitle: challenge.title,
+        reviewerId: callerUserId,
+      });
     } else {
       await this.activity.record({
         userId: enrollment.userId,
@@ -219,6 +229,15 @@ export class ReviewsService {
           reviewerId: callerUserId,
           rejectionReason: result.rejectionReason,
         },
+      });
+      this.telemetry.trackEvent('submission.rejected', {
+        userId: enrollment.userId,
+        submissionId: result.id,
+        enrollmentId: enrollment.id,
+        challengeId: challenge.id,
+        challengeTitle: challenge.title,
+        reviewerId: callerUserId,
+        rejectionReason: result.rejectionReason,
       });
     }
     return result;
