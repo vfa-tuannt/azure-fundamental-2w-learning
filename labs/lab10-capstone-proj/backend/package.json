@@ -92,8 +92,8 @@
     "testEnvironment": "node"
   },
   "engines": {
-    "node": "24.13.0",
-    "yarn": "1.22.22",
+    "node": ">=24.13.0 <25",
+    "yarn": ">=1.22.0 <2",
     "npm": "please-use-yarn"
   },
   "packageManager": "yarn@1.22.22"

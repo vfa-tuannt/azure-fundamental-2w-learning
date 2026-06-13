@@ -12,11 +12,11 @@ The system SHALL provision a Linux App Service Plan `plan-skillplatform-prod` wi
 - **THEN** VNet Integration is enabled with `snet-app` selected and route-all traffic through the VNet is ON
 
 ### Requirement: Key Vault references for all secrets
-Every secret consumed by the NestJS app SHALL be configured as an App Setting using the `@Microsoft.KeyVault(SecretUri=...)` syntax pointing at the corresponding [infra-secrets](../infra-secrets/spec.md) entry. The exhaustive list of Key Vault-backed app settings SHALL be: `DATABASE_URL`, `AZURE_STORAGE_CONNECTION_STRING`, `COSMOS_CONNECTION_STRING`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `JWT_PRIVATE_KEY`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, `SCANNER_SHARED_SECRET`. Other app settings (NON-secret) MAY be set as plain values: `NODE_ENV=production`, `PORT=8080`, `CORS_ORIGIN=<static-web-app-url>`, `THUMBNAIL_SERVICE_URL=https://<container-app-fqdn>`.
+Every secret consumed by the NestJS app SHALL be configured as an App Setting using the `@Microsoft.KeyVault(SecretUri=...)` syntax pointing at the corresponding [infra-secrets](../infra-secrets/spec.md) entry. The exhaustive list of Key Vault-backed app settings SHALL be: `DATABASE_URL`, `AZURE_STORAGE_CONNECTION_STRING`, `COSMOS_CONNECTION_STRING`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, `SCANNER_SHARED_SECRET`. Other app settings (NON-secret) MAY be set as plain values: `NODE_ENV=production`, `PORT=8080`, `CORS_ORIGIN=<static-web-app-url>`, `THUMBNAIL_SERVICE_URL=https://<container-app-fqdn>`.
 
-#### Scenario: All eight Key Vault references resolve
+#### Scenario: All nine Key Vault references resolve
 - **WHEN** the App Service is restarted
-- **THEN** the Portal's App Settings list shows a green checkmark next to each of the eight Key Vault-referenced settings
+- **THEN** the Portal's App Settings list shows a green checkmark next to each of the nine Key Vault-referenced settings
 
 #### Scenario: NestJS reads secrets as plain env vars
 - **WHEN** NestJS code reads `process.env.DATABASE_URL` at runtime

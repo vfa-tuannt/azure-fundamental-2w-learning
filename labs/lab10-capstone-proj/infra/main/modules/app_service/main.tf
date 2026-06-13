@@ -46,6 +46,13 @@ resource "azurerm_linux_web_app" "this" {
       node_version = "24-lts"
     }
 
+    # Startup command. `yarn start:prod` runs the `start:prod` script in
+    # package.json (`node dist/main`). We use the yarn script indirection
+    # (rather than `node dist/main.js` directly) so the command stays a
+    # single source of truth — change the script, redeploy, no infra
+    # change needed.
+    app_command_line = "yarn start:prod"
+
     # Route ALL outbound traffic (not just RFC1918) through the VNet.
     vnet_route_all_enabled = true
 
@@ -67,10 +74,10 @@ resource "azurerm_linux_web_app" "this" {
 ############################################
 # App settings
 #
-# Eight Key Vault references (one per secret in kv-secrets.tf) plus
-# four plain values. KV refs use the un-versioned SecretUri form so the
-# App Service runtime always resolves the LATEST version — secret
-# rotation does not require an app-settings redeploy.
+# Nine Key Vault references (one per secret in kv-secrets.tf) plus four
+# plain values. KV refs use the un-versioned SecretUri form so the App
+# Service runtime always resolves the LATEST version — secret rotation
+# does not require an app-settings redeploy.
 ############################################
 
 locals {
@@ -81,9 +88,17 @@ locals {
     google_client_id     = "@Microsoft.KeyVault(SecretUri=${var.key_vault_uri}secrets/google-client-id)"
     google_client_secret = "@Microsoft.KeyVault(SecretUri=${var.key_vault_uri}secrets/google-client-secret)"
     jwt_private_key      = "@Microsoft.KeyVault(SecretUri=${var.key_vault_uri}secrets/jwt-private-key)"
+    jwt_public_key       = "@Microsoft.KeyVault(SecretUri=${var.key_vault_uri}secrets/jwt-public-key)"
     appinsights_conn     = "@Microsoft.KeyVault(SecretUri=${var.key_vault_uri}secrets/appinsights-connection-string)"
     scanner_secret       = "@Microsoft.KeyVault(SecretUri=${var.key_vault_uri}secrets/scanner-shared-secret)"
   }
+
+  # GOOGLE_CALLBACK_URL points at the App Service's own hostname. Until
+  # APIM lands in Phase 4.x, OAuth callbacks hit the App Service directly.
+  # The hostname is deterministic from the app name, so we construct it
+  # here rather than reading the computed `default_hostname` attribute
+  # (which would create a self-reference inside the same resource).
+  google_callback_url = "https://${var.app_name}.azurewebsites.net/auth/google/callback"
 
   app_settings = {
     DATABASE_URL                          = local.kv_ref.database_url
@@ -92,12 +107,20 @@ locals {
     GOOGLE_CLIENT_ID                      = local.kv_ref.google_client_id
     GOOGLE_CLIENT_SECRET                  = local.kv_ref.google_client_secret
     JWT_PRIVATE_KEY                       = local.kv_ref.jwt_private_key
+    JWT_PUBLIC_KEY                        = local.kv_ref.jwt_public_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = local.kv_ref.appinsights_conn
     SCANNER_SHARED_SECRET                 = local.kv_ref.scanner_secret
 
     NODE_ENV              = "production"
     PORT                  = "8080"
     CORS_ORIGIN           = var.cors_origin
+    FRONTEND_URL          = var.cors_origin
+    GOOGLE_CALLBACK_URL   = local.google_callback_url
     THUMBNAIL_SERVICE_URL = var.thumbnail_service_url
+
+    # Strip ANSI colour codes from NestJS Logger output. Log Stream &
+    # Log Analytics show raw bytes — without this, every line is
+    # prefixed with garbage escape sequences that hurt searchability.
+    NO_COLOR = "true"
   }
 }

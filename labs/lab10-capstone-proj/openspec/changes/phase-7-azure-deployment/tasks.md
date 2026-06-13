@@ -166,9 +166,9 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 - [x] 2.1.4 **(Portal)** Health check → enable, path `/health`, 2 min window.
 - [x] 2.1.5 Delete both.
 - [x] 2.1.6 **(Terraform)** Add `infra/main/modules/app_service/` with `azurerm_service_plan` (`sku_name = "B1"`, `os_type = "Linux"`) and `azurerm_linux_web_app` (`site_config.application_stack.node_version = "24-lts"`, `identity.type = "SystemAssigned"`, `virtual_network_subnet_id = snet_app.id`, `site_config.health_check_path = "/health"`).
-- [x] 2.1.7 **(Terraform)** Configure `app_settings` per [infra-app-service](specs/infra-app-service/spec.md): eight Key Vault references plus `NODE_ENV=production`, `PORT=8080`, `CORS_ORIGIN`, `THUMBNAIL_SERVICE_URL` (set placeholder; will update after Phase 7c).
+- [x] 2.1.7 **(Terraform)** Configure `app_settings` per [infra-app-service](specs/infra-app-service/spec.md): nine Key Vault references plus `NODE_ENV=production`, `PORT=8080`, `CORS_ORIGIN`, `THUMBNAIL_SERVICE_URL` (set placeholder; will update after Phase 7c).
 - [x] 2.1.8 **(Terraform)** Grant the App Service MI `Key Vault Secrets User`, `Storage Blob Data Contributor`, and `Cosmos DB Built-in Data Contributor` (the Cosmos role is a data-plane role; use `azapi_resource` or `az rest` post-apply if `azurerm` lacks coverage).
-- [x] 2.1.9 `terraform apply`. Restart the App Service in the Portal; confirm all eight Key Vault references show green checkmarks under Environment Variables.
+- [x] 2.1.9 `terraform apply`. Restart the App Service in the Portal; confirm all nine Key Vault references show green checkmarks under Environment Variables.
 
 ### 2.2 NestJS code changes for Azure
 
@@ -181,11 +181,11 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 
 ### 2.3 First-time deploy of NestJS
 
-- [ ] 2.3.1 **(Portal)** Run a one-off deploy from local: `cd backend && yarn build && cd dist && zip -r ../deploy.zip . && cd .. && az webapp deploy --resource-group rg-skillplatform-prod --name app-skillplatform-prod --src-path deploy.zip --type zip`.
-- [ ] 2.3.2 **(Portal)** Watch Deployment Center → Logs to see the deploy succeed.
-- [ ] 2.3.3 The App Service is **not** publicly reachable yet (we will restrict it to APIM only at 4.x). For this initial test, **temporarily** un-restrict it (Networking → Access restriction → Allow all) for one curl. Then `curl https://app-skillplatform-prod.azurewebsites.net/health` → expect `{ "status": "ok" }`. Lock it back down once done.
-- [ ] 2.3.4 **(Portal)** App Service → Log stream → confirm logs appear; pipe through App Insights Live Metrics → confirm requests show up.
-- [ ] 2.3.5 Set up Google OAuth for production: in the Google Cloud Console add `https://app-skillplatform-prod.azurewebsites.net/auth/google/callback` as an authorized redirect URI. Update `google-client-id` / `google-client-secret` in Key Vault if they differ from local.
+- [x] 2.3.1 **(Portal)** Run a one-off deploy from local: `cd backend && yarn build && cd dist && zip -r ../deploy.zip . && cd .. && az webapp deploy --resource-group rg-skillplatform-prod --name app-skillplatform-prod --src-path deploy.zip --type zip`.
+- [x] 2.3.2 **(Portal)** Watch Deployment Center → Logs to see the deploy succeed.
+- [x] 2.3.3 The App Service is **not** publicly reachable yet (we will restrict it to APIM only at 4.x). For this initial test, **temporarily** un-restrict it (Networking → Access restriction → Allow all) for one curl. Then `curl https://app-skillplatform-prod.azurewebsites.net/health` → expect `{ "status": "ok" }`. Lock it back down once done.
+- [x] 2.3.4 **(Portal)** App Service → Log stream → confirm logs appear; pipe through App Insights Live Metrics → confirm requests show up.
+- [x] 2.3.5 Set up Google OAuth for production: in the Google Cloud Console add `https://app-skillplatform-prod.azurewebsites.net/auth/google/callback` as an authorized redirect URI. Update `google-client-id` / `google-client-secret` in Key Vault if they differ from local.
 
 ### 2.4 TypeORM migrations against Azure Postgres
 
