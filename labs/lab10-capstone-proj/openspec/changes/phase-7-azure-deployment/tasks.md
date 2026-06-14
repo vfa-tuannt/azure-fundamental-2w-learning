@@ -196,11 +196,11 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 
 ### 2.5 Static Web App for frontend
 
-- [ ] 2.5.1 **(Portal)** Create Static Web App `stapp-skillplatform-prod`, Free tier, region East Asia, Source: Other (custom GH Actions). Confirm the default `*.azurestaticapps.net` hostname.
-- [ ] 2.5.2 Delete; recreate via Terraform: `azurerm_static_web_app` in `infra/main/modules/static_web_app/`. Output `default_host_name` and store as a Terraform output.
-- [ ] 2.5.3 Add `frontend/staticwebapp.config.json` with SPA fallback (`{ "navigationFallback": { "rewrite": "/index.html", "exclude": ["/assets/*"] } }`) and the cache-control rule for `/assets/*`.
-- [ ] 2.5.4 First-time manual deploy: `cd frontend && VITE_API_URL=https://app-skillplatform-prod.azurewebsites.net VITE_PUBLIC_URL=<swa-url> yarn build`, then use the SWA CLI: `npx @azure/static-web-apps-cli deploy ./dist --deployment-token <token>` (get the token from the SWA's Overview blade).
-- [ ] 2.5.5 Open the SWA URL in a browser; confirm the SPA shell loads and `/login` route works.
+- [x] 2.5.1 **(Portal)** Create Static Web App `stapp-skillplatform-prod`, Free tier, region East Asia, Source: Other (custom GH Actions). Confirm the default `*.azurestaticapps.net` hostname.
+- [x] 2.5.2 Delete; recreate via Terraform: `azurerm_static_web_app` in `infra/main/modules/static_web_app/`. Output `default_host_name` and store as a Terraform output.
+- [x] 2.5.3 Add `frontend/public/staticwebapp.config.json` (placed under Vite's `public/` so the build copies it to `dist/`) with SPA fallback (`{ "navigationFallback": { "rewrite": "/index.html", "exclude": ["/assets/*"] } }`) and the cache-control rule for `/assets/*`.
+- [x] 2.5.4 First-time manual deploy: `cd frontend && VITE_API_URL=https://app-skillplatform-prod.azurewebsites.net VITE_PUBLIC_URL=<swa-url> yarn build`, then use the SWA CLI: `npx @azure/static-web-apps-cli deploy ./dist --deployment-token <token>` (get the token from the SWA's Overview blade).
+- [x] 2.5.5 Open the SWA URL in a browser; confirm the SPA shell loads and `/login` route works.
 
 ### 2.6 First end-to-end test
 

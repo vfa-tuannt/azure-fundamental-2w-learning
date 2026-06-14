@@ -169,3 +169,21 @@ module "app_service" {
   cors_origin           = var.cors_origin
   thumbnail_service_url = var.thumbnail_service_url
 }
+
+############################################
+# Static Web App — Vue SPA hosting (Free tier, East Asia)
+#
+# Lives in eastasia (the closest SWA-supported region to japaneast).
+# Public by design — the Free SKU has no VNet integration, but the SPA
+# only serves a static shell. Sensitive traffic leaves the browser bound
+# for APIM, not this resource.
+############################################
+
+module "static_web_app" {
+  source = "./modules/static_web_app"
+
+  name                = local.naming.stapp
+  location            = "eastasia"
+  resource_group_name = azurerm_resource_group.workload.name
+  tags                = local.tags
+}

@@ -12,7 +12,7 @@ The system SHALL provision an Azure Static Web App `stapp-skillplatform-prod` on
 - **THEN** the SKU is `Free`
 
 ### Requirement: SPA routing fallback
-The repository SHALL contain a `frontend/staticwebapp.config.json` that maps unmatched routes to `/index.html` so client-side Vue Router paths (e.g., `/challenges/abc`) load the SPA shell, not 404. Static assets under `/assets/*` SHALL be served with `Cache-Control: max-age=31536000, immutable`.
+The repository SHALL contain a `frontend/public/staticwebapp.config.json` (placed in Vite's `public/` directory so it is copied verbatim into `dist/` at build time, which is where the SWA runtime expects to find it) that maps unmatched routes to `/index.html` so client-side Vue Router paths (e.g., `/challenges/abc`) load the SPA shell, not 404. Static assets under `/assets/*` SHALL be served with `Cache-Control: max-age=31536000, immutable`.
 
 #### Scenario: Deep link loads SPA
 - **WHEN** a user opens `https://<swa>.azurestaticapps.net/challenges/abc` directly in a new tab
