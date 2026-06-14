@@ -204,16 +204,16 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 
 ### 2.6 First end-to-end test
 
-- [ ] 2.6.1 Temporarily allow public access to App Service (Access restrictions → Allow all). This is a security regression — only do it for this end-to-end smoke test, then revert.
-- [ ] 2.6.2 Open the deployed SWA URL → click Sign in with Google → complete the OAuth → land back on the SWA → confirm Navbar shows your avatar + name.
-- [ ] 2.6.3 Create a challenge → enroll on a second incognito-tab account → submit a file → confirm the submission row appears (thumbnail will be NULL — that's Phase 7c).
-- [ ] 2.6.4 Re-lock App Service ingress (revert 2.6.1). The FE will be broken until 4.x adds APIM — accept that.
+- [x] 2.6.1 Temporarily allow public access to App Service (Access restrictions → Allow all). This is a security regression — only do it for this end-to-end smoke test, then revert.
+- [x] 2.6.2 Open the deployed SWA URL → click Sign in with Google → complete the OAuth → land back on the SWA → confirm Navbar shows your avatar + name.
+- [x] 2.6.3 Create a challenge → enroll on a second incognito-tab account → submit a file → confirm the submission row appears (thumbnail will be NULL — that's Phase 7c).
+- [x] 2.6.4 Re-lock App Service ingress (revert 2.6.1). The FE will be broken until 4.x adds APIM — accept that.
 
 ### 2.7 Demo checkpoint 7b
 
-- [ ] 2.7.1 Take a screenshot of the SWA showing the logged-in dashboard.
-- [ ] 2.7.2 Take a screenshot of the App Insights Live Metrics stream during the login flow.
-- [ ] 2.7.3 Commit and push the Terraform changes + NestJS App Insights wiring + `staticwebapp.config.json` to a branch.
+- [x] 2.7.1 Take a screenshot of the SWA showing the logged-in dashboard.
+- [x] 2.7.2 Take a screenshot of the App Insights Live Metrics stream during the login flow.
+- [x] 2.7.3 Commit and push the Terraform changes + NestJS App Insights wiring + `staticwebapp.config.json` to a branch.
 
 ---
 
