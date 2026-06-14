@@ -51,3 +51,23 @@ resource "azurerm_postgresql_flexible_server_database" "skillplatform" {
   charset   = "UTF8"
   collation = "en_US.utf8"
 }
+
+############################################
+# Allow-listed extensions
+#
+# Azure Postgres Flexible Server blocks `CREATE EXTENSION` by default.
+# Each extension a non-admin user wants to create must first be added
+# to the `azure.extensions` server parameter (comma-separated list,
+# uppercase names). This setting is dynamic — no server restart needed.
+#
+# `UUID-OSSP` is required by the Phase-1 `CreateUsersTable` migration
+# which calls `uuid_generate_v4()` in default column expressions. If
+# new migrations introduce additional extensions (pgcrypto, citext,
+# postgis, ...) extend the value below.
+############################################
+
+resource "azurerm_postgresql_flexible_server_configuration" "azure_extensions" {
+  server_id = azurerm_postgresql_flexible_server.this.id
+  name      = "azure.extensions"
+  value     = "UUID-OSSP"
+}

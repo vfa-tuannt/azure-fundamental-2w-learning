@@ -189,10 +189,10 @@ Goal: NestJS running on App Service, Vue running on Static Web Apps, login flow 
 
 ### 2.4 TypeORM migrations against Azure Postgres
 
-- [ ] 2.4.1 Cloud Shell or local laptop (if your IP is allowlisted via Bastion or if you can SSH-tunnel via a temporary VM) — confirm you can `psql` against the private FQDN. If not possible, you must run migrations via the App Service. Easiest path: run `yarn migration:run` as a **deployment script** via `az webapp ssh` once the app is deployed.
-- [ ] 2.4.2 SSH into App Service: `az webapp ssh --resource-group rg-skillplatform-prod --name app-skillplatform-prod`. Inside the container, navigate to `/home/site/wwwroot` and run `yarn migration:run`.
-- [ ] 2.4.3 Confirm via `psql` (same SSH session, `apt-get install -y postgresql-client` first if missing) `\dt` shows all tables from phases 1–6.
-- [ ] 2.4.4 Smoke test: `curl -X POST https://app-skillplatform-prod.azurewebsites.net/auth/google` (after temporarily unlocking ingress per 2.3.3) — should redirect to the Google consent page.
+- [x] 2.4.1 Cloud Shell or local laptop (if your IP is allowlisted via Bastion or if you can SSH-tunnel via a temporary VM) — confirm you can `psql` against the private FQDN. If not possible, you must run migrations via the App Service. Easiest path: run `yarn migration:run` as a **deployment script** via `az webapp ssh` once the app is deployed.
+- [x] 2.4.2 SSH into App Service: `az webapp ssh --resource-group rg-skillplatform-prod --name app-skillplatform-prod`. Inside the container, navigate to `/home/site/wwwroot` and run `yarn migration:run:prod`.
+- [x] 2.4.3 Confirm via `psql` (same SSH session, `apt-get install -y postgresql-client` first if missing) `\dt` shows all tables from phases 1–6.
+- [x] 2.4.4 Smoke test: `curl -X POST https://app-skillplatform-prod.azurewebsites.net/auth/google` (after temporarily unlocking ingress per 2.3.3) — should redirect to the Google consent page.
 
 ### 2.5 Static Web App for frontend
 

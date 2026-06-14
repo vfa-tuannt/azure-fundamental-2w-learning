@@ -18,6 +18,9 @@ export default new DataSource({
   type: 'postgres',
   url: databaseUrl,
   entities: [User, Challenge, Enrollment, Submission, ActivityEvent],
-  migrations: ['src/migrations/*.ts'],
+  // __dirname resolves to `src/` in dev (ts-node) and `dist/` in prod
+  // (after `nest build`). The `{ts,js}` glob then picks up whichever
+  // extension exists at that location — no NODE_ENV branching needed.
+  migrations: [__dirname + '/migrations/*.{ts,js}'],
   migrationsTableName: 'migrations',
 });

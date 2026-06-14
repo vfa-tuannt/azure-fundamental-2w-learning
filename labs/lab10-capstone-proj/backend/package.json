@@ -21,7 +21,9 @@
     "typeorm": "node --no-warnings --loader ts-node/esm ./node_modules/typeorm/cli.js -d src/data-source.ts",
     "migration:generate": "typeorm-ts-node-commonjs -d src/data-source.ts migration:generate",
     "migration:run": "typeorm-ts-node-commonjs -d src/data-source.ts migration:run",
-    "migration:revert": "typeorm-ts-node-commonjs -d src/data-source.ts migration:revert"
+    "migration:run:prod": "node ./node_modules/typeorm/cli.js -d dist/data-source.js migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d src/data-source.ts migration:revert",
+    "migration:revert:prod": "node ./node_modules/typeorm/cli.js -d dist/data-source.js migration:revert"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.31.0",
